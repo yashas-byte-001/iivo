@@ -55,7 +55,7 @@ export function useAuth() {
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href,
+        redirectTo: `${window.location.origin}/#waitlist`,
       },
     });
 

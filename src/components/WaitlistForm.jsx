@@ -156,6 +156,14 @@ export function WaitlistForm({ className = '' }) {
     setProfileValues({ fullName: '', college: '', course: '', role: 'Student' });
   }, [user, checkWaitlistStatus, setExistingEntry, setError, setSuccess]);
 
+  React.useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [session]);
+
   const handlePasswordSubmit = async ({ name = '', email = '', password = '' }) => {
     if (authMode === 'signup') {
       const created = await signUpWithPassword({ email, password, name });
