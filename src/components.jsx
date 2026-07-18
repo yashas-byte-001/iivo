@@ -22,6 +22,8 @@ import {
 import { WaitlistForm } from './components/WaitlistForm';
 
 const OPTISTUDY_MOCK_SITE_URL = 'https://opti-study-mock.vercel.app/';
+const NAV_SCROLL_COLLAPSE_AT = 72;
+const NAV_SCROLL_EXPAND_AT = 28;
 
 export function SectionTitle({ kicker, title, description, align = 'left' }) {
   return (
@@ -86,7 +88,7 @@ export function AnimatedGrid() {
 
 export function BackgroundEffects({ variant = 'hero' }) {
   const reduceMotion = useReducedMotion();
-  const particles = [0, 1, 2, 3, 4, 5, 6, 7];
+  const particles = reduceMotion ? [] : [0, 1, 2, 3, 4, 5, 6, 7];
 
   return (
     <div className={`background-effects background-${variant}`} aria-hidden="true">
@@ -111,10 +113,23 @@ export function BackgroundEffects({ variant = 'hero' }) {
 
 export function Navbar({ activeSection = 'home' }) {
   const { scrollY } = useScroll();
+  const reduceMotion = useReducedMotion();
   const [scrolled, setScrolled] = React.useState(false);
   const [navExpanded, setNavExpanded] = React.useState(false);
 
-  React.useEffect(() => scrollY.on('change', (value) => setScrolled(value > 50)), [scrollY]);
+  React.useEffect(() => {
+    const unsubscribe = scrollY.on('change', (value) => {
+      setScrolled((current) => {
+        if (current) {
+          return value > NAV_SCROLL_EXPAND_AT;
+        }
+
+        return value > NAV_SCROLL_COLLAPSE_AT;
+      });
+    });
+
+    return unsubscribe;
+  }, [scrollY]);
 
   React.useEffect(() => {
     if (!scrolled) {
@@ -133,16 +148,14 @@ export function Navbar({ activeSection = 'home' }) {
   return (
     <motion.header
       className={`floating-nav-shell ${scrolled ? 'is-scrolled' : 'is-top'} ${navExpanded ? 'is-expanded' : 'is-collapsed'}`}
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      layout
+      initial={reduceMotion ? false : { opacity: 0, y: -12 }}
+      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      transition={reduceMotion ? undefined : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
       <motion.nav
         className={`floating-nav glass-pill ${scrolled ? 'is-scrolled' : 'is-hero'} ${navExpanded ? 'is-expanded' : 'is-collapsed'}`}
         aria-label="Primary navigation"
-        layout
-        transition={{ type: 'spring', stiffness: 360, damping: 34, mass: 0.95 }}
+        transition={reduceMotion ? undefined : { type: 'spring', stiffness: 360, damping: 34, mass: 0.95 }}
       >
         {scrolled ? (
           <button
@@ -166,7 +179,7 @@ export function Navbar({ activeSection = 'home' }) {
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
               {links.map((link) => (
                 <a key={link.label} href={link.href} className={activeSection === link.href.slice(1) ? 'is-active' : ''}>
@@ -185,7 +198,7 @@ export function Navbar({ activeSection = 'home' }) {
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
               <PrimaryButton href={OPTISTUDY_MOCK_SITE_URL} target="_blank" rel="noreferrer" className="nav-cta">Launch OptiStudy</PrimaryButton>
             </motion.div>

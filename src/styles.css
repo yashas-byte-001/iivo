@@ -66,6 +66,8 @@ button { font: inherit; }
 .section-shell {
   position: relative;
   padding: clamp(6.5rem, 9vw, 8.5rem) 1rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 900px;
 }
 
 .section-inner {
@@ -1064,12 +1066,47 @@ button { font: inherit; }
   .floating-nav {
     position: relative;
     gap: 0.8rem;
-    padding: 0.82rem 0.9rem;
+    padding: 0.68rem 0.8rem;
+    align-items: center;
+  }
+
+  .floating-nav.is-scrolled,
+  .floating-nav.is-expanded {
+    width: min(100%, calc(100vw - 1.2rem));
   }
 
   .floating-nav.is-collapsed {
     width: fit-content;
-    padding-inline: 0.95rem;
+    padding-inline: 0.82rem;
+  }
+
+  .brand-markup {
+    font-size: 0.95rem;
+    letter-spacing: 0.24em;
+  }
+
+  .nav-brand-button {
+    padding-block: 0.1rem;
+  }
+
+  .nav-cta {
+    min-height: 2.45rem;
+    padding-inline: 0.88rem;
+    font-size: 0.84rem;
+  }
+
+  .glass-panel,
+  .glass-pill {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .particle-layer {
+    display: none;
+  }
+
+  .bg-orb {
+    filter: blur(14px);
   }
 
   .hero-shell { padding-top: 3rem; }
