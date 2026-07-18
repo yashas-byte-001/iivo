@@ -25,6 +25,39 @@ const OPTISTUDY_MOCK_SITE_URL = 'https://opti-study-mock.vercel.app/';
 const NAV_SCROLL_COLLAPSE_AT = 72;
 const NAV_SCROLL_EXPAND_AT = 28;
 
+function useMediaQuery(query) {
+  const getMatches = React.useCallback(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.matchMedia(query).matches;
+  }, [query]);
+
+  const [matches, setMatches] = React.useState(getMatches);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia(query);
+    const handleChange = (event) => setMatches(event.matches);
+
+    setMatches(mediaQuery.matches);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, [query]);
+
+  return matches;
+}
+
 export function SectionTitle({ kicker, title, description, align = 'left' }) {
   return (
     <div className={`max-w-4xl ${align === 'center' ? 'mx-auto text-center' : ''}`}>
@@ -114,10 +147,17 @@ export function BackgroundEffects({ variant = 'hero' }) {
 export function Navbar({ activeSection = 'home' }) {
   const { scrollY } = useScroll();
   const reduceMotion = useReducedMotion();
+  const isCompactViewport = useMediaQuery('(max-width: 720px)');
   const [scrolled, setScrolled] = React.useState(false);
   const [navExpanded, setNavExpanded] = React.useState(false);
 
   React.useEffect(() => {
+    if (isCompactViewport) {
+      setScrolled(false);
+      setNavExpanded(false);
+      return undefined;
+    }
+
     const unsubscribe = scrollY.on('change', (value) => {
       setScrolled((current) => {
         if (current) {
@@ -129,13 +169,13 @@ export function Navbar({ activeSection = 'home' }) {
     });
 
     return unsubscribe;
-  }, [scrollY]);
+  }, [scrollY, isCompactViewport]);
 
   React.useEffect(() => {
-    if (!scrolled) {
+    if (!scrolled || isCompactViewport) {
       setNavExpanded(false);
     }
-  }, [scrolled]);
+  }, [scrolled, isCompactViewport]);
 
   const links = [
     { label: 'Home', href: '#home' },
@@ -157,7 +197,7 @@ export function Navbar({ activeSection = 'home' }) {
         aria-label="Primary navigation"
         transition={reduceMotion ? undefined : { type: 'spring', stiffness: 360, damping: 34, mass: 0.95 }}
       >
-        {scrolled ? (
+        {scrolled && !isCompactViewport ? (
           <button
             type="button"
             className="brand-markup nav-brand-button"
@@ -172,7 +212,7 @@ export function Navbar({ activeSection = 'home' }) {
         )}
 
         <AnimatePresence initial={false}>
-          {(!scrolled || navExpanded) && (
+          {!isCompactViewport && (!scrolled || navExpanded) && (
             <motion.div
               key="nav-links"
               className="nav-links nav-links-desktop"
@@ -191,7 +231,7 @@ export function Navbar({ activeSection = 'home' }) {
         </AnimatePresence>
 
         <AnimatePresence initial={false}>
-          {(!scrolled || navExpanded) && (
+          {(!scrolled || navExpanded || isCompactViewport) && (
             <motion.div
               key="nav-actions"
               className="nav-actions"
