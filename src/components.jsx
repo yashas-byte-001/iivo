@@ -273,6 +273,7 @@ export function Hero() {
 
           <div className="hero-actions">
             <PrimaryButton href={OPTISTUDY_MOCK_SITE_URL} target="_blank" rel="noreferrer">Explore OptiStudy</PrimaryButton>
+            <SecondaryButton href="#waitlist">Join Waitlist</SecondaryButton>
             <SecondaryButton href="#about">Learn About IIVO</SecondaryButton>
           </div>
 
@@ -380,7 +381,7 @@ export function Features() {
 
 export function CTA() {
   return (
-    <section className="section-shell">
+    <section id="waitlist" className="section-shell">
       <div className="section-inner">
         <motion.div className="cta-banner glass-panel" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.76 }}>
           <div className="cta-inner">

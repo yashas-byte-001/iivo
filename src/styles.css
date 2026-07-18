@@ -786,6 +786,125 @@ button { font: inherit; }
   line-height: 1.6;
 }
 
+.waitlist-auth-shell,
+.waitlist-profile-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.waitlist-google-hero {
+  width: 100%;
+}
+
+.waitlist-auth-divider {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0.1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.waitlist-auth-divider::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+}
+
+.waitlist-auth-divider span {
+  position: relative;
+  z-index: 1;
+  padding-inline: 0.6rem;
+  background: rgba(11, 15, 20, 0.88);
+}
+
+.waitlist-auth-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.waitlist-auth-toggle button {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.waitlist-auth-toggle button.is-active {
+  background: rgba(91, 124, 255, 0.18);
+  color: white;
+}
+
+.waitlist-auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.waitlist-google {
+  min-height: 3.25rem;
+}
+
+.waitlist-confirmation {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 0.15rem 0;
+}
+
+.waitlist-confirmation-badge,
+.waitlist-profile-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.92rem;
+}
+
+.waitlist-confirmation-badge {
+  width: fit-content;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(91, 124, 255, 0.18);
+  background: rgba(91, 124, 255, 0.1);
+}
+
+.waitlist-confirmation h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.waitlist-confirmation p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.waitlist-signout {
+  min-height: 3rem;
+  justify-content: center;
+}
+
+.waitlist-profile-note {
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .waitlist-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -810,6 +929,7 @@ button { font: inherit; }
 }
 
 .waitlist-field input,
+.waitlist-field select,
 .waitlist-dropdown-trigger {
   width: 100%;
   min-height: 3rem;
@@ -824,6 +944,14 @@ button { font: inherit; }
   -webkit-appearance: none;
   appearance: none;
   background-clip: padding-box;
+}
+
+.waitlist-field select {
+  padding-right: 2.5rem;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.72) 50%), linear-gradient(135deg, rgba(255, 255, 255, 0.72) 50%, transparent 50%);
+  background-position: calc(100% - 1.2rem) 55%, calc(100% - 0.9rem) 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
 }
 
 .waitlist-field input::placeholder {
@@ -841,12 +969,14 @@ button { font: inherit; }
 }
 
 .waitlist-field input:focus,
+.waitlist-field select:focus,
 .waitlist-dropdown-trigger:focus {
   border-color: rgba(91, 124, 255, 0.42);
   box-shadow: 0 0 0 3px rgba(91, 124, 255, 0.12);
 }
 
 .waitlist-field input:disabled,
+.waitlist-field select:disabled,
 .waitlist-dropdown-trigger:disabled,
 .waitlist-submit:disabled {
   opacity: 0.7;
@@ -916,6 +1046,10 @@ button { font: inherit; }
   flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
+}
+
+.waitlist-profile-form .waitlist-actions {
+  justify-content: flex-start;
 }
 
 .waitlist-submit {
@@ -1155,6 +1289,18 @@ button { font: inherit; }
   .waitlist-panel { width: 100%; }
 
   .waitlist-grid { grid-template-columns: 1fr; }
+
+  .waitlist-auth-actions,
+  .waitlist-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .waitlist-google,
+  .waitlist-signout,
+  .waitlist-submit {
+    width: 100%;
+  }
 
   .waitlist-dropdown-menu {
     top: calc(100% + 0.5rem);
