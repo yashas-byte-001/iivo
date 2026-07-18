@@ -19,41 +19,29 @@ function AuthModeToggle({ authMode, setAuthMode }) {
   );
 }
 
-function AuthForm({ onGoogle, onPasswordSubmit, authMode, loading, authError }) {
-  const [values, setValues] = React.useState({ name: '', email: '', password: '' });
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setValues((current) => ({ ...current, [name]: value }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await onPasswordSubmit(values);
-  };
-
+function AuthForm({ onGoogle, onPasswordSubmit, authMode, loading, authError, values, onChange }) {
   return (
-    <form className="waitlist-auth-form" onSubmit={handleSubmit}>
+    <form className="waitlist-auth-form" onSubmit={(e) => { e.preventDefault(); onPasswordSubmit(values); }}>
       {authMode === 'signup' ? (
         <label className="waitlist-field">
           <span>Full name</span>
-          <input type="text" name="name" value={values.name} onChange={handleChange} autoComplete="name" placeholder="Your name" disabled={loading} />
+          <input type="text" name="name" value={values.name} onChange={onChange} autoComplete="name" placeholder="Your name" disabled={loading} />
         </label>
       ) : null}
 
       <label className="waitlist-field">
         <span>Email</span>
-        <input type="email" name="email" value={values.email} onChange={handleChange} autoComplete="email" placeholder="you@example.com" required disabled={loading} />
+        <input type="email" name="email" value={values.email} onChange={onChange} autoComplete="email" placeholder="you@example.com" required disabled={loading} />
       </label>
 
       <label className="waitlist-field">
         <span>Password</span>
-        <input type="password" name="password" value={values.password} onChange={handleChange} autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'} placeholder="••••••••" required minLength={6} disabled={loading} />
+        <input type="password" name="password" value={values.password} onChange={onChange} autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'} placeholder="••••••••" required minLength={6} disabled={loading} />
       </label>
 
       <div className="waitlist-auth-actions">
         <button type="submit" className="primary-button waitlist-submit" disabled={loading}>
-          <span>{authMode === 'signup' ? 'Create account' : 'Login'}</span>
+          <span>{authMode === 'signup' ? 'Create Account' : 'Sign In'}</span>
           <ArrowRight size={16} />
         </button>
 
@@ -139,6 +127,9 @@ function RoleDropdown({ value, onChange, disabled }) {
 export function WaitlistForm({ className = '' }) {
   const { session, user, loading: authLoading, error: authError, signInWithGoogle, signUpWithPassword, signInWithPassword, signOut } = useAuth();
   const { joinWaitlist, checkWaitlistStatus, loading, error, success, existingEntry, setExistingEntry, setError, setSuccess } = useWaitlist();
+  const [view, setView] = React.useState('initial'); // 'initial' | 'email'
+  const [emailValues, setEmailValues] = React.useState({ email: '', password: '' });
+  const [localAuthError, setLocalAuthError] = React.useState('');
   const [authMode, setAuthMode] = React.useState(INITIAL_AUTH_MODE);
   const [profileValues, setProfileValues] = React.useState({ fullName: '', college: '', course: '', role: 'Student' });
   const [checking, setChecking] = React.useState(false);
@@ -146,7 +137,9 @@ export function WaitlistForm({ className = '' }) {
   React.useEffect(() => {
     if (user) {
       setChecking(true);
-      checkWaitlistStatus({ user }).finally(() => setChecking(false));
+      checkWaitlistStatus().finally(() => setChecking(false));
+      // Once authenticated, move out of the email entry view into the waitlist/confirmation flow
+      setView('initial');
       return;
     }
 
@@ -161,19 +154,68 @@ export function WaitlistForm({ className = '' }) {
       return;
     }
 
-    document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = document.getElementById('waitlist');
+    if (!el) return;
+
+    // Account for any fixed header by measuring its height, then scroll so
+    // the waitlist form is centered in the viewport on all screen sizes.
+    const header = document.querySelector('header') || document.querySelector('.site-header');
+    const headerHeight = header ? header.getBoundingClientRect().height : 0;
+    const rect = el.getBoundingClientRect();
+    const top = window.scrollY + rect.top - headerHeight - Math.max((window.innerHeight - rect.height) / 2, 16);
+
+    window.scrollTo({ top: Math.max(0, Math.round(top)), behavior: 'smooth' });
+
+    // After scrolling, focus the first interactive input inside the waitlist
+    // so users on mobile/desktop can start typing immediately.
+    setTimeout(() => {
+      const first = el.querySelector('input, textarea, select, button');
+      first?.focus?.();
+    }, 450);
   }, [session]);
 
   const handlePasswordSubmit = async ({ name = '', email = '', password = '' }) => {
     if (authMode === 'signup') {
       const created = await signUpWithPassword({ email, password, name });
-      if (created) {
-        setAuthMode('signin');
+      if (!created) {
+        return;
       }
+
+      // attempt immediate sign-in after account creation
+      await signInWithPassword({ email, password });
       return;
     }
 
     await signInWithPassword({ email, password });
+  };
+
+  const handleEmailChange = (e) => {
+    const { name, value } = e.target;
+    setEmailValues((c) => ({ ...c, [name]: value }));
+    setLocalAuthError('');
+    setError('');
+  };
+
+  const handleCreateAccount = async () => {
+    setLocalAuthError('');
+    setError('');
+    const created = await signUpWithPassword({ email: emailValues.email, password: emailValues.password, name: emailValues.name || '' });
+    if (!created) {
+      setLocalAuthError(authError || 'Unable to create account.');
+      return;
+    }
+
+    // Attempt to sign in immediately after creating the account
+    await signInWithPassword({ email: emailValues.email, password: emailValues.password });
+  };
+
+  const handleSignIn = async () => {
+    setLocalAuthError('');
+    setError('');
+    const signedIn = await signInWithPassword({ email: emailValues.email, password: emailValues.password });
+    if (!signedIn) {
+      setLocalAuthError(authError || 'Unable to sign in.');
+    }
   };
 
   const handleProfileChange = (event) => {
@@ -207,16 +249,66 @@ export function WaitlistForm({ className = '' }) {
       </div>
 
       {!session ? (
-        <div className="waitlist-auth-shell">
-          <button type="button" className="waitlist-google-hero primary-button" onClick={signInWithGoogle} disabled={isBusy}>
-            <Sparkles size={16} />
-            <span>Continue with Google</span>
-          </button>
+        <div className={`waitlist-auth-shell auth-view auth-view-${view}`}>
+          {view === 'initial' ? (
+            <div className="auth-initial">
+              <button type="button" className="waitlist-google-hero primary-button" onClick={signInWithGoogle} disabled={isBusy}>
+                <Sparkles size={16} />
+                <span>Continue with Google</span>
+              </button>
 
-          <div className="waitlist-auth-divider"><span>or</span></div>
+              <div className="waitlist-auth-divider"><span>or</span></div>
 
-          <AuthModeToggle authMode={authMode} setAuthMode={setAuthMode} />
-          <AuthForm onGoogle={signInWithGoogle} onPasswordSubmit={handlePasswordSubmit} authMode={authMode} loading={isBusy} authError={authError || error} />
+              <button type="button" className="secondary-button waitlist-email-cta" onClick={() => { setView('email'); setAuthMode(INITIAL_AUTH_MODE); }} disabled={isBusy}>
+                Continue with Email
+              </button>
+            </div>
+          ) : (
+            <div className="auth-email">
+              <div className="email-form-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <AuthModeToggle authMode={authMode} setAuthMode={setAuthMode} />
+                </div>
+                <div>
+                  <button type="button" className="secondary-button" onClick={() => setView('initial')} disabled={isBusy}>
+                    Back
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 8 }}>
+                <label className="waitlist-field">
+                  <span>Email</span>
+                  <input type="email" name="email" value={emailValues.email} onChange={handleEmailChange} autoComplete="email" placeholder="you@example.com" required disabled={isBusy} />
+                </label>
+
+                {authMode === 'signup' ? (
+                  <label className="waitlist-field">
+                    <span>Full name</span>
+                    <input type="text" name="name" value={emailValues.name || ''} onChange={handleEmailChange} autoComplete="name" placeholder="Your name" disabled={isBusy} />
+                  </label>
+                ) : null}
+
+                <label className="waitlist-field">
+                  <span>Password</span>
+                  <input type="password" name="password" value={emailValues.password} onChange={handleEmailChange} autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'} placeholder="••••••••" required minLength={6} disabled={isBusy} />
+                </label>
+
+                <div className="waitlist-auth-actions email-actions">
+                  <button type="button" className="primary-button waitlist-submit" onClick={authMode === 'signup' ? handleCreateAccount : handleSignIn} disabled={isBusy}>
+                    <span>{authMode === 'signup' ? 'Create Account' : 'Sign In'}</span>
+                    <ArrowRight size={16} />
+                  </button>
+
+                  <button type="button" className="secondary-button" onClick={() => signInWithGoogle()} disabled={isBusy}>
+                    Continue with Google
+                  </button>
+                </div>
+
+                {(authError || localAuthError || error) ? <p className="waitlist-status is-error">{authError || localAuthError || error}</p> : null}
+              </div>
+            </div>
+          )}
         </div>
       ) : showJoined ? (
         <div className="waitlist-confirmation">
@@ -224,8 +316,9 @@ export function WaitlistForm({ className = '' }) {
             <Shield size={18} />
             <span>Waitlist confirmed</span>
           </div>
-          <h3>You're already on the IIVO waitlist.</h3>
+          <h3>🎉 You're already on the IIVO waitlist.</h3>
           <p>Signed in as {user.email}. We’ll keep your spot associated with this account.</p>
+          <p>We'll email you when early access becomes available.</p>
           <button type="button" className="secondary-button waitlist-signout" onClick={signOut} disabled={isBusy}>
             <LogOut size={16} />
             <span>Sign out</span>

@@ -47,7 +47,18 @@ export function useWaitlist() {
   }, []);
 
   const checkWaitlistStatus = React.useCallback(async ({ user }) => {
-    if (!user) {
+    // If no explicit user provided, try to resolve the current auth user (auth.uid())
+    let targetUser = user;
+    if (!targetUser) {
+      try {
+        const { data } = await supabase.auth.getUser();
+        targetUser = data?.user ?? null;
+      } catch (_) {
+        targetUser = null;
+      }
+    }
+
+    if (!targetUser) {
       setExistingEntry(null);
       return null;
     }
@@ -56,7 +67,7 @@ export function useWaitlist() {
     setError('');
 
     try {
-      const entry = await findWaitlistEntry({ userId: user.id, email: user.email?.toLowerCase() ?? '' });
+      const entry = await findWaitlistEntry({ userId: targetUser.id, email: targetUser.email?.toLowerCase() ?? '' });
       setExistingEntry(entry);
       return entry;
     } catch {

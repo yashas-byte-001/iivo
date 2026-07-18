@@ -1,5 +1,6 @@
 import React from 'react';
 import { About, CTA, Features, Footer, Hero, Navbar, Product } from './components';
+import { supabase } from './lib/supabase';
 
 function useActiveSection() {
   const [activeSection, setActiveSection] = React.useState('home');
@@ -38,9 +39,11 @@ function useActiveSection() {
 export default function App() {
   const activeSection = useActiveSection();
   const heroVisible = activeSection === 'home';
+  // No password-recovery handling — removed per design change to keep auth flows simple and inside the modal.
 
   return (
     <div className="app-shell">
+      {/* Password recovery removed — modal and flows were intentionally removed. */}
       <Navbar activeSection={activeSection} heroVisible={heroVisible} />
       <main>
         <Hero />
