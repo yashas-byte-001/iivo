@@ -836,6 +836,104 @@ button { font: inherit; }
   line-height: 1.65;
 }
 
+.waitlist-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: start center;
+  padding: clamp(1rem, 3vw, 2rem);
+  background:
+    radial-gradient(circle at top, rgba(232, 163, 61, 0.16), transparent 30%),
+    rgba(3, 6, 10, 0.68);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.waitlist-popup {
+  position: relative;
+  width: min(100%, 36rem);
+  margin-top: clamp(0.5rem, 7vh, 4rem);
+  padding: clamp(1.2rem, 3vw, 1.6rem);
+  border-radius: 28px;
+  display: grid;
+  gap: 1rem;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(232, 163, 61, 0.12), transparent 28%),
+    rgba(18, 24, 31, 0.96);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+}
+
+.waitlist-popup-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.waitlist-popup-close:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.waitlist-popup-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(232, 163, 61, 0.12);
+  color: #ffd59a;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.waitlist-popup h2 {
+  margin: 0;
+  max-width: 24rem;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+}
+
+.waitlist-popup p {
+  margin: 0;
+  max-width: 31rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.waitlist-popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.waitlist-popup-button {
+  min-width: 14rem;
+  justify-content: center;
+}
+
+.waitlist-popup-button--secondary {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.waitlist-popup-button svg {
+  flex: none;
+}
+
 .join-waitlist-page {
   position: relative;
   min-height: 100vh;
