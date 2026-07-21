@@ -2,6 +2,8 @@ import React from 'react';
 import { supabase } from '../lib/supabase';
 
 export function useAuth() {
+  const loginPageUrl = `${window.location.origin}/join-waitlist.html`;
+  const detailsPageUrl = `${window.location.origin}/join-waitlist-details.html`;
   const [session, setSession] = React.useState(null);
   const [loading, setLoading] = React.useState(Boolean(supabase));
   const [error, setError] = React.useState('');
@@ -75,7 +77,7 @@ export function useAuth() {
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/#waitlist`,
+        redirectTo: detailsPageUrl,
       },
     });
 
@@ -146,7 +148,7 @@ export function useAuth() {
 
     // Use Supabase password reset API; include redirect back to waitlist anchor
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/#waitlist`,
+      redirectTo: loginPageUrl,
     });
 
     if (resetError) {

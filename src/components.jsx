@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnimatePresence, motion, useReducedMotion, useScroll } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   BrainCircuit,
@@ -19,11 +19,11 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import { WaitlistForm } from './components/WaitlistForm';
 
 const OPTISTUDY_MOCK_SITE_URL = 'https://opti-study-mock.vercel.app/';
 const NAV_SCROLL_COLLAPSE_AT = 72;
 const NAV_SCROLL_EXPAND_AT = 28;
+const JoinWaitlistTeaser = React.lazy(() => import('./components/JoinWaitlistTeaser'));
 
 function useMediaQuery(query) {
   const getMatches = React.useCallback(() => {
@@ -115,13 +115,25 @@ export function SecondaryButton({ children, href, className = '', ...props }) {
   );
 }
 
+function JoinWaitlistTeaserFallback() {
+  return (
+    <div className="waitlist-teaser">
+      <p className="waitlist-teaser-label">Join the waitlist</p>
+      <p className="waitlist-teaser-copy">Continue to the dedicated join page to sign in first and complete your profile.</p>
+      <PrimaryButton href="join-waitlist.html" className="waitlist-teaser-button" aria-label="Join the waitlist">
+        Join waitlist
+      </PrimaryButton>
+    </div>
+  );
+}
+
 export function AnimatedGrid() {
   return <div className="animated-grid" aria-hidden="true" />;
 }
 
 export function BackgroundEffects({ variant = 'hero' }) {
   const reduceMotion = useReducedMotion();
-  const particles = reduceMotion ? [] : [0, 1, 2, 3, 4, 5, 6, 7];
+  const particles = reduceMotion ? [] : [0, 1, 2, 3];
 
   return (
     <div className={`background-effects background-${variant}`} aria-hidden="true">
@@ -145,7 +157,6 @@ export function BackgroundEffects({ variant = 'hero' }) {
 }
 
 export function Navbar({ activeSection = 'home' }) {
-  const { scrollY } = useScroll();
   const reduceMotion = useReducedMotion();
   const isCompactViewport = useMediaQuery('(max-width: 720px)');
   const [scrolled, setScrolled] = React.useState(false);
@@ -158,18 +169,16 @@ export function Navbar({ activeSection = 'home' }) {
       return undefined;
     }
 
-    const unsubscribe = scrollY.on('change', (value) => {
-      setScrolled((current) => {
-        if (current) {
-          return value > NAV_SCROLL_EXPAND_AT;
-        }
+    const updateScrolledState = () => {
+      const value = window.scrollY;
+      setScrolled((current) => (current ? value > NAV_SCROLL_EXPAND_AT : value > NAV_SCROLL_COLLAPSE_AT));
+    };
 
-        return value > NAV_SCROLL_COLLAPSE_AT;
-      });
-    });
+    updateScrolledState();
+    window.addEventListener('scroll', updateScrolledState, { passive: true });
 
-    return unsubscribe;
-  }, [scrollY, isCompactViewport]);
+    return () => window.removeEventListener('scroll', updateScrolledState);
+  }, [isCompactViewport]);
 
   React.useEffect(() => {
     if (!scrolled || isCompactViewport) {
@@ -273,7 +282,7 @@ export function Hero() {
 
           <div className="hero-actions">
             <PrimaryButton href={OPTISTUDY_MOCK_SITE_URL} target="_blank" rel="noreferrer">Explore OptiStudy</PrimaryButton>
-            <SecondaryButton href="#waitlist">Join Waitlist</SecondaryButton>
+            <SecondaryButton href="join-waitlist.html">Join Waitlist</SecondaryButton>
             <SecondaryButton href="#about">Learn About IIVO</SecondaryButton>
           </div>
 
@@ -391,7 +400,11 @@ export function CTA() {
               <p className="section-copy mt-6 max-w-3xl">Be among the first to experience OptiStudy — now live in testing with students shaping how it evolves.</p>
             </div>
 
-            <WaitlistForm className="waitlist-panel" />
+            <div className="waitlist-panel waitlist-panel--teaser">
+              <React.Suspense fallback={<JoinWaitlistTeaserFallback />}>
+                <JoinWaitlistTeaser />
+              </React.Suspense>
+            </div>
           </div>
         </motion.div>
       </div>

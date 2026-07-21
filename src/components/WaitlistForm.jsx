@@ -124,7 +124,7 @@ function RoleDropdown({ value, onChange, disabled }) {
   );
 }
 
-export function WaitlistForm({ className = '' }) {
+export function WaitlistForm({ className = '', mode = 'full' }) {
   const { session, user, loading: authLoading, error: authError, signInWithGoogle, signUpWithPassword, signInWithPassword, signOut } = useAuth();
   const { joinWaitlist, checkWaitlistStatus, loading, error, success, existingEntry, setExistingEntry, setError, setSuccess } = useWaitlist();
   const [view, setView] = React.useState('initial'); // 'initial' | 'email'
@@ -133,6 +133,9 @@ export function WaitlistForm({ className = '' }) {
   const [authMode, setAuthMode] = React.useState(INITIAL_AUTH_MODE);
   const [profileValues, setProfileValues] = React.useState({ fullName: '', college: '', course: '', role: 'Student' });
   const [checking, setChecking] = React.useState(false);
+  const hasJoined = Boolean(existingEntry) || success;
+  const showAuth = mode !== 'collect';
+  const showCollection = mode !== 'auth';
 
   React.useEffect(() => {
     if (user) {
@@ -150,11 +153,11 @@ export function WaitlistForm({ className = '' }) {
   }, [user, checkWaitlistStatus, setExistingEntry, setError, setSuccess]);
 
   React.useEffect(() => {
-    if (!session) {
+    if (!session || !showCollection) {
       return;
     }
 
-    const el = document.getElementById('waitlist');
+    const el = document.getElementById('waitlist') || document.querySelector('.waitlist-form');
     if (!el) return;
 
     // Account for any fixed header by measuring its height, then scroll so
@@ -172,7 +175,19 @@ export function WaitlistForm({ className = '' }) {
       const first = el.querySelector('input, textarea, select, button');
       first?.focus?.();
     }, 450);
-  }, [session]);
+  }, [session, showCollection]);
+
+  React.useEffect(() => {
+    if (!session || !hasJoined || !showCollection) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      window.location.assign(new URL('index.html', window.location.href).toString());
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [hasJoined, session, showCollection]);
 
   const handlePasswordSubmit = async ({ name = '', email = '', password = '' }) => {
     if (authMode === 'signup') {
@@ -238,7 +253,7 @@ export function WaitlistForm({ className = '' }) {
     });
   };
 
-  const showJoined = Boolean(existingEntry) || success;
+  const showJoined = hasJoined;
   const isBusy = authLoading || loading || checking;
 
   return (
@@ -248,7 +263,7 @@ export function WaitlistForm({ className = '' }) {
         <p className="waitlist-form-copy">Sign in first, then we’ll keep the waitlist details minimal and tied to your account.</p>
       </div>
 
-      {!session ? (
+      {showAuth && !session ? (
         <div className={`waitlist-auth-shell auth-view auth-view-${view}`}>
           {view === 'initial' ? (
             <div className="auth-initial">
@@ -310,7 +325,7 @@ export function WaitlistForm({ className = '' }) {
             </div>
           )}
         </div>
-      ) : showJoined ? (
+      ) : showCollection && showJoined ? (
         <div className="waitlist-confirmation">
           <div className="waitlist-confirmation-badge">
             <Shield size={18} />
@@ -324,7 +339,7 @@ export function WaitlistForm({ className = '' }) {
             <span>Sign out</span>
           </button>
         </div>
-      ) : (
+      ) : showCollection ? (
         <form className="waitlist-profile-form" onSubmit={handleJoinSubmit}>
           <div className="waitlist-profile-note">
             <Mail size={16} />
@@ -362,10 +377,10 @@ export function WaitlistForm({ className = '' }) {
           </div>
 
           <p className={`waitlist-status ${error ? 'is-error' : success ? 'is-success' : ''}`} aria-live="polite">
-            {error || (success ? 'Welcome! You’re officially on the waitlist.' : '')}
+            {error || (success ? 'Welcome! You’re officially on the waitlist. Redirecting home in 5 seconds.' : '')}
           </p>
         </form>
-      )}
+      ) : null}
     </div>
   );
 }

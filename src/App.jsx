@@ -1,6 +1,8 @@
 import React from 'react';
 import { About, CTA, Features, Footer, Hero, Navbar, Product } from './components';
-import { supabase } from './lib/supabase';
+
+const JoinWaitlistPage = React.lazy(() => import('./components/JoinWaitlistPage'));
+const JoinWaitlistDetailsPage = React.lazy(() => import('./components/JoinWaitlistDetailsPage'));
 
 function useActiveSection() {
   const [activeSection, setActiveSection] = React.useState('home');
@@ -37,13 +39,30 @@ function useActiveSection() {
 }
 
 export default function App() {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isJoinWaitlistPage = pathname.endsWith('join-waitlist.html');
+  const isJoinWaitlistDetailsPage = pathname.endsWith('join-waitlist-details.html');
   const activeSection = useActiveSection();
   const heroVisible = activeSection === 'home';
-  // No password-recovery handling — removed per design change to keep auth flows simple and inside the modal.
+
+  if (isJoinWaitlistPage) {
+    return (
+      <React.Suspense fallback={null}>
+        <JoinWaitlistPage />
+      </React.Suspense>
+    );
+  }
+
+  if (isJoinWaitlistDetailsPage) {
+    return (
+      <React.Suspense fallback={null}>
+        <JoinWaitlistDetailsPage />
+      </React.Suspense>
+    );
+  }
 
   return (
     <div className="app-shell">
-      {/* Password recovery removed — modal and flows were intentionally removed. */}
       <Navbar activeSection={activeSection} heroVisible={heroVisible} />
       <main>
         <Hero />
