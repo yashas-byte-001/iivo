@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase';
 
 export function useAuth() {
   const loginPageUrl = `${window.location.origin}/join-waitlist.html`;
-  const detailsPageUrl = `${window.location.origin}/join-waitlist-details.html`;
   const [session, setSession] = React.useState(null);
   const [loading, setLoading] = React.useState(Boolean(supabase));
   const [error, setError] = React.useState('');
@@ -74,10 +73,13 @@ export function useAuth() {
 
     setError('');
 
+    console.log('[IIVO auth] window.location.origin =', window.location.origin);
+    console.log('[IIVO auth] redirectTo =', loginPageUrl);
+
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: detailsPageUrl,
+        redirectTo: loginPageUrl,
       },
     });
 

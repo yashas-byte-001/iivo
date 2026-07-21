@@ -124,7 +124,25 @@ function RoleDropdown({ value, onChange, disabled }) {
   );
 }
 
-export function WaitlistForm({ className = '', mode = 'full' }) {
+export function WaitlistJoinedState({ email, isBusy = false, onSignOut }) {
+  return (
+    <div className="waitlist-confirmation">
+      <div className="waitlist-confirmation-badge">
+        <Shield size={18} />
+        <span>Waitlist confirmed</span>
+      </div>
+      <h3>🎉 You're already on the IIVO waitlist.</h3>
+      <p>We'll notify you when early access becomes available.</p>
+      <p>Signed in as {email}. We’ll keep your spot associated with this account.</p>
+      <button type="button" className="secondary-button waitlist-signout" onClick={onSignOut} disabled={isBusy}>
+        <LogOut size={16} />
+        <span>Sign out</span>
+      </button>
+    </div>
+  );
+}
+
+export function WaitlistForm({ className = '', mode = 'full', checkExistingEntry = true }) {
   const { session, user, loading: authLoading, error: authError, signInWithGoogle, signUpWithPassword, signInWithPassword, signOut } = useAuth();
   const { joinWaitlist, checkWaitlistStatus, loading, error, success, existingEntry, setExistingEntry, setError, setSuccess } = useWaitlist();
   const [view, setView] = React.useState('initial'); // 'initial' | 'email'
@@ -136,9 +154,12 @@ export function WaitlistForm({ className = '', mode = 'full' }) {
   const hasJoined = Boolean(existingEntry) || success;
   const showAuth = mode !== 'collect';
   const showCollection = mode !== 'auth';
+  const authenticatedEmail = user && user.email ? user.email : '';
+  const isCollectModeLoading = showCollection && authLoading;
+  const shouldRedirectToLogin = showCollection && !authLoading && !user;
 
   React.useEffect(() => {
-    if (user) {
+    if (user && checkExistingEntry) {
       setChecking(true);
       checkWaitlistStatus().finally(() => setChecking(false));
       // Once authenticated, move out of the email entry view into the waitlist/confirmation flow
@@ -146,11 +167,27 @@ export function WaitlistForm({ className = '', mode = 'full' }) {
       return;
     }
 
+    if (!checkExistingEntry) {
+      return;
+    }
+
     setExistingEntry(null);
     setSuccess(false);
     setError('');
     setProfileValues({ fullName: '', college: '', course: '', role: 'Student' });
-  }, [user, checkWaitlistStatus, setExistingEntry, setError, setSuccess]);
+  }, [checkExistingEntry, user, checkWaitlistStatus, setExistingEntry, setError, setSuccess]);
+
+  React.useEffect(() => {
+    if (!shouldRedirectToLogin) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      window.location.assign('join-waitlist.html');
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [shouldRedirectToLogin]);
 
   React.useEffect(() => {
     if (!session || !showCollection) {
@@ -188,6 +225,38 @@ export function WaitlistForm({ className = '', mode = 'full' }) {
 
     return () => window.clearTimeout(timeoutId);
   }, [hasJoined, session, showCollection]);
+
+  if (isCollectModeLoading) {
+    return (
+      <div className={`waitlist-form glass-panel ${className}`}>
+        <div className="waitlist-form-head">
+          <p className="section-kicker mb-0">Waitlist details</p>
+          <p className="waitlist-form-copy">Loading your account...</p>
+        </div>
+
+        <div className="waitlist-loading-state" aria-live="polite">
+          <span className="waitlist-spinner" aria-hidden="true" />
+          <span>Checking your authentication state</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (shouldRedirectToLogin) {
+    return (
+      <div className={`waitlist-form glass-panel ${className}`}>
+        <div className="waitlist-form-head">
+          <p className="section-kicker mb-0">Waitlist details</p>
+          <p className="waitlist-form-copy">Redirecting you back to sign in...</p>
+        </div>
+
+        <div className="waitlist-loading-state" aria-live="polite">
+          <span className="waitlist-spinner" aria-hidden="true" />
+          <span>Returning to the login page</span>
+        </div>
+      </div>
+    );
+  }
 
   const handlePasswordSubmit = async ({ name = '', email = '', password = '' }) => {
     if (authMode === 'signup') {
@@ -332,7 +401,7 @@ export function WaitlistForm({ className = '', mode = 'full' }) {
             <span>Waitlist confirmed</span>
           </div>
           <h3>🎉 You're already on the IIVO waitlist.</h3>
-          <p>Signed in as {user.email}. We’ll keep your spot associated with this account.</p>
+          <p>Signed in as {authenticatedEmail}. We’ll keep your spot associated with this account.</p>
           <p>We'll email you when early access becomes available.</p>
           <button type="button" className="secondary-button waitlist-signout" onClick={signOut} disabled={isBusy}>
             <LogOut size={16} />
@@ -343,7 +412,7 @@ export function WaitlistForm({ className = '', mode = 'full' }) {
         <form className="waitlist-profile-form" onSubmit={handleJoinSubmit}>
           <div className="waitlist-profile-note">
             <Mail size={16} />
-            <span>Email will be pulled automatically from your account: {user.email}</span>
+            <span>Email will be pulled automatically from your account: {authenticatedEmail}</span>
           </div>
 
           <div className="waitlist-grid">
