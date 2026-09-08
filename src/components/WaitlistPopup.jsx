@@ -19,11 +19,33 @@ export default function WaitlistPopup() {
       return undefined;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    /*
+     * Wait for the visitor to actually see the hero before interrupting them.
+     * Firing at 1.2s put a blurred overlay over the whole page before anyone
+     * had read a word of it. Now it waits for the first scroll past the hero,
+     * and falls back to a timer for people who never scroll.
+     */
+    const open = () => {
       window.sessionStorage.setItem(SEEN_KEY, '1');
       setIsOpen(true);
-    }, 1200);
-    return () => window.clearTimeout(timeoutId);
+      cleanup();
+    };
+
+    const handleScroll = () => {
+      if (window.scrollY > window.innerHeight * 0.6) {
+        open();
+      }
+    };
+
+    const timeoutId = window.setTimeout(open, 12000);
+
+    function cleanup() {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return cleanup;
   }, []);
 
   React.useEffect(() => {

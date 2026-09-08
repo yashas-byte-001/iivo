@@ -1,5 +1,5 @@
 import React from 'react';
-import { About, CTA, Features, Footer, Hero, Navbar, Product } from './components';
+import { About, CTA, Features, Footer, Hero, Navbar, Product, ScrollProgress } from './components';
 const WaitlistPopup = React.lazy(() => import('./components/WaitlistPopup'));
 
 const JoinWaitlistPage = React.lazy(() => import('./components/JoinWaitlistPage'));
@@ -64,6 +64,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <ScrollProgress />
       <Navbar activeSection={activeSection} heroVisible={heroVisible} />
       <React.Suspense fallback={null}>
         <WaitlistPopup />

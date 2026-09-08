@@ -1,7 +1,16 @@
 import React from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 import {
   ArrowRight,
+  ArrowUpRight,
   BrainCircuit,
   CalendarDays,
   ChartNoAxesCombined,
@@ -13,6 +22,7 @@ import {
   Linkedin,
   Mail,
   MessageCircleMore,
+  ShieldCheck,
   Sparkles,
   Stars,
   TimerReset,
@@ -20,9 +30,22 @@ import {
   Zap,
 } from 'lucide-react';
 
-const OPTISTUDY_MOCK_SITE_URL = 'https://opti-study-mock.vercel.app/';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_URL, OPTISTUDY_DEMO_URL, WAITLIST_URL } from './config/links';
+
 const NAV_SCROLL_COLLAPSE_AT = 72;
 const NAV_SCROLL_EXPAND_AT = 28;
+
+/* One easing family for the whole site; mirrors --ease in styles.css. */
+const EASE = [0.16, 1, 0.3, 1];
+const HERO_LINES = ['Intelligence.', 'Innovation.', 'Vision.', 'Optimization.'];
+
+/* Reveals share a shape so sections feel like one system, not six animations. */
+const reveal = (delay = 0, distance = 26) => ({
+  initial: { opacity: 0, y: distance },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.25 },
+  transition: { duration: 0.85, delay, ease: EASE },
+});
 const JoinWaitlistTeaser = React.lazy(() => import('./components/JoinWaitlistTeaser'));
 
 function useMediaQuery(query) {
@@ -56,6 +79,68 @@ function useMediaQuery(query) {
   }, [query]);
 
   return matches;
+}
+
+/* A hairline of the same light, tracking how far through the page you are. */
+export function ScrollProgress() {
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+
+  if (reduceMotion) {
+    return null;
+  }
+
+  return <motion.div className="scroll-progress" style={{ scaleX }} aria-hidden="true" />;
+}
+
+const TILT_SPRING = { stiffness: 150, damping: 18, mass: 0.6 };
+
+/*
+ * A card that leans toward the cursor and lights up under it. The rotation runs
+ * through motion values rather than CSS custom properties because framer owns
+ * the transform on these elements — fighting it from CSS just loses.
+ */
+function TiltCard({ className = '', delay = 0, distance = 24, children }) {
+  const reduceMotion = useReducedMotion();
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(pointerY, [-0.5, 0.5], [7, -7]), TILT_SPRING);
+  const rotateY = useSpring(useTransform(pointerX, [-0.5, 0.5], [-9, 9]), TILT_SPRING);
+
+  const handleMove = (event) => {
+    if (reduceMotion) {
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const localX = event.clientX - rect.left;
+    const localY = event.clientY - rect.top;
+
+    pointerX.set(localX / rect.width - 0.5);
+    pointerY.set(localY / rect.height - 0.5);
+
+    /* The spotlight gradient reads these two. */
+    event.currentTarget.style.setProperty('--mx', `${localX}px`);
+    event.currentTarget.style.setProperty('--my', `${localY}px`);
+  };
+
+  const handleLeave = () => {
+    pointerX.set(0);
+    pointerY.set(0);
+  };
+
+  return (
+    <motion.article
+      className={className}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      style={reduceMotion ? undefined : { rotateX, rotateY, transformPerspective: 1000 }}
+      {...reveal(delay, distance)}
+    >
+      {children}
+    </motion.article>
+  );
 }
 
 export function SectionTitle({ kicker, title, description, align = 'left' }) {
@@ -115,12 +200,32 @@ export function SecondaryButton({ children, href, className = '', ...props }) {
   );
 }
 
+/*
+ * The app is open to the approved pilot roster only. The link stays visible to
+ * everyone — the app meets anyone else with its own closed-pilot page — but it
+ * is always labelled so nobody clicks it expecting general access.
+ */
+export function PilotAccessLink({ className = '' }) {
+  return (
+    <motion.a
+      href={OPTISTUDY_APP_URL}
+      className={`pilot-link ${className}`}
+      whileHover={{ y: -1 }}
+      {...EXTERNAL_LINK_PROPS}
+    >
+      <ShieldCheck size={14} />
+      <span>Pilot user? Open OptiStudy</span>
+      <ArrowUpRight size={14} />
+    </motion.a>
+  );
+}
+
 function JoinWaitlistTeaserFallback() {
   return (
     <div className="waitlist-teaser">
       <p className="waitlist-teaser-label">Join the waitlist</p>
       <p className="waitlist-teaser-copy">Continue to the dedicated join page to sign in first and complete your profile.</p>
-      <PrimaryButton href="join-waitlist.html" className="waitlist-teaser-button" aria-label="Join the waitlist">
+      <PrimaryButton href={WAITLIST_URL} className="waitlist-teaser-button" aria-label="Join the waitlist">
         Join waitlist
       </PrimaryButton>
     </div>
@@ -128,30 +233,191 @@ function JoinWaitlistTeaserFallback() {
 }
 
 export function AnimatedGrid() {
-  return <div className="animated-grid" aria-hidden="true" />;
+  return <div className="aurora-grid" aria-hidden="true" />;
 }
 
+/* One ellipse, three passes: wide spill, soft halo, hairline core. */
+const AURORA_PATH = 'M -120 760 A 860 700 0 0 1 1560 760';
+
+/*
+ * Lights that travel the orbits. Each rides the upper half of one ellipse, so
+ * it enters from the dark at one edge and leaves at the other — the ring is
+ * only ever lit where something is moving along it.
+ */
+const ORBITERS = [
+  { id: 'outer', path: 'M -340 910 A 1060 860 0 0 1 1780 910', duration: 34, delay: 0, size: 2.6, trail: 13 },
+  { id: 'mid', path: 'M -260 910 A 980 800 0 0 1 1700 910', duration: 26, delay: -9, size: 3.2, trail: 16 },
+  { id: 'inner', path: 'M 0 910 A 720 585 0 0 1 1440 910', duration: 19, delay: -14, size: 2.2, trail: 11 },
+];
+
+/* Fixed, not random: a rebuild should not reshuffle the sky. */
+const STAR_DUST = [
+  { id: 1, x: 180, y: 150, r: 1.4, duration: 7, delay: 0 },
+  { id: 2, x: 420, y: 96, r: 1, duration: 9, delay: -2 },
+  { id: 3, x: 980, y: 128, r: 1.2, duration: 8, delay: -4 },
+  { id: 4, x: 1240, y: 208, r: 1.5, duration: 11, delay: -1 },
+  { id: 5, x: 620, y: 62, r: 1, duration: 10, delay: -6 },
+  { id: 6, x: 1340, y: 92, r: 1.1, duration: 9, delay: -3 },
+  { id: 7, x: 96, y: 300, r: 1.2, duration: 12, delay: -5 },
+  { id: 8, x: 1180, y: 340, r: 1, duration: 8, delay: -7 },
+];
+
+function AuroraArc({ reduceMotion }) {
+  return (
+    <motion.svg
+      className="aurora-svg"
+      viewBox="0 0 1440 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      animate={reduceMotion ? undefined : { opacity: [0.85, 1, 0.85] }}
+      transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      <defs>
+        <linearGradient id="aurora-rim" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0" />
+          <stop offset="16%" stopColor="#4f6bff" stopOpacity="0.5" />
+          <stop offset="38%" stopColor="#eaf0ff" stopOpacity="0.95" />
+          <stop offset="58%" stopColor="#dfe6ff" stopOpacity="0.9" />
+          <stop offset="82%" stopColor="#a05cff" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#a05cff" stopOpacity="0" />
+        </linearGradient>
+
+        <linearGradient id="aurora-spill" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0" />
+          <stop offset="22%" stopColor="#4f6bff" stopOpacity="0.55" />
+          <stop offset="45%" stopColor="#2fe6c9" stopOpacity="0.28" />
+          <stop offset="70%" stopColor="#a05cff" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#a05cff" stopOpacity="0" />
+        </linearGradient>
+
+        <radialGradient id="aurora-pool" cx="50%" cy="0%" r="70%">
+          <stop offset="0%" stopColor="#6076ff" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#6076ff" stopOpacity="0" />
+        </radialGradient>
+
+        <linearGradient id="orbit-stroke" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0" />
+          <stop offset="30%" stopColor="#8ea3ff" stopOpacity="0.22" />
+          <stop offset="50%" stopColor="#dfe6ff" stopOpacity="0.32" />
+          <stop offset="70%" stopColor="#b08cff" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#a05cff" stopOpacity="0" />
+        </linearGradient>
+
+        <linearGradient id="comet-stroke" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0.1" />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#a05cff" stopOpacity="0.1" />
+        </linearGradient>
+
+        <radialGradient id="orbiter-halo">
+          <stop offset="0%" stopColor="#cfd9ff" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#cfd9ff" stopOpacity="0" />
+        </radialGradient>
+
+        <filter id="aurora-soft" x="-25%" y="-70%" width="150%" height="280%">
+          <feGaussianBlur stdDeviation="34" />
+        </filter>
+        <filter id="aurora-tight" x="-15%" y="-45%" width="130%" height="220%">
+          <feGaussianBlur stdDeviation="7" />
+        </filter>
+      </defs>
+
+      {/* Light pooling under the ribbon, so it sits in space rather than on top of it. */}
+      <ellipse cx="720" cy="300" rx="540" ry="130" fill="url(#aurora-pool)" filter="url(#aurora-soft)" opacity="0.55" />
+
+      {/*
+       * Orbits share the arc's centre, so the rings read as paths around the
+       * same body the horizon light belongs to. Only their crowns clear the
+       * fold; the rest is below the viewport, which is what sells the scale.
+       */}
+      <g className="orbit-rings">
+        <ellipse cx="720" cy="910" rx="1060" ry="860" fill="none" stroke="url(#orbit-stroke)" strokeWidth="1" opacity="0.5" />
+        <ellipse cx="720" cy="910" rx="980" ry="800" fill="none" stroke="url(#orbit-stroke)" strokeWidth="1" opacity="0.7" />
+        <ellipse cx="720" cy="910" rx="720" ry="585" fill="none" stroke="url(#orbit-stroke)" strokeWidth="1" opacity="0.55" />
+      </g>
+
+      <path d={AURORA_PATH} fill="none" stroke="url(#aurora-spill)" strokeWidth="56" filter="url(#aurora-soft)" opacity="0.65" />
+      <path d={AURORA_PATH} fill="none" stroke="url(#aurora-rim)" strokeWidth="12" filter="url(#aurora-tight)" opacity="0.75" />
+      <path d={AURORA_PATH} fill="none" stroke="url(#aurora-rim)" strokeWidth="1.6" opacity="0.95" />
+
+      {!reduceMotion && (
+        <>
+          {/*
+           * A short bright segment chases the horizon line. Animating the dash
+           * offset rather than moving an element means the light follows the
+           * curve exactly, and the browser does it on the compositor.
+           */}
+          <path
+            className="arc-comet"
+            d={AURORA_PATH}
+            fill="none"
+            stroke="url(#comet-stroke)"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeDasharray="150 4000"
+          />
+
+          {ORBITERS.map((orbiter) => (
+            <g key={orbiter.id}>
+              <circle r={orbiter.trail} fill="url(#orbiter-halo)" opacity="0.5">
+                <animateMotion dur={`${orbiter.duration}s`} begin={`${orbiter.delay}s`} repeatCount="indefinite" path={orbiter.path} />
+              </circle>
+              <circle r={orbiter.size} fill="#f2f5ff" filter="url(#aurora-tight)">
+                <animateMotion dur={`${orbiter.duration}s`} begin={`${orbiter.delay}s`} repeatCount="indefinite" path={orbiter.path} />
+              </circle>
+            </g>
+          ))}
+
+          <g className="star-dust">
+            {STAR_DUST.map((star) => (
+              <circle key={star.id} cx={star.x} cy={star.y} r={star.r} fill="#dfe6ff" opacity="0.4">
+                <animate
+                  attributeName="opacity"
+                  values="0.12;0.55;0.12"
+                  dur={`${star.duration}s`}
+                  begin={`${star.delay}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+            ))}
+          </g>
+        </>
+      )}
+    </motion.svg>
+  );
+}
+
+/*
+ * Obsidian Aurora: a single ribbon of light plus its spill. The arc breathes,
+ * the blooms drift, nothing else moves. Every loop is long, slow and runs on
+ * transform/opacity only, so the rig stays cheap and stops under reduced motion.
+ */
 export function BackgroundEffects({ variant = 'hero' }) {
   const reduceMotion = useReducedMotion();
-  const particles = reduceMotion ? [] : [0, 1, 2, 3];
 
   return (
     <div className={`background-effects background-${variant}`} aria-hidden="true">
       <AnimatedGrid />
-      <motion.div className="bg-orb bg-orb-a" animate={reduceMotion ? undefined : { x: [0, 24, 0], y: [0, -16, 0] }} transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }} />
-      <motion.div className="bg-orb bg-orb-b" animate={reduceMotion ? undefined : { x: [0, -18, 0], y: [0, 24, 0] }} transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }} />
-      <motion.div className="bg-orb bg-orb-c" animate={reduceMotion ? undefined : { opacity: [0.25, 0.45, 0.25], scale: [1, 1.08, 1] }} transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }} />
-      <div className="particle-layer">
-        {particles.map((particle) => (
-          <motion.span
-            key={particle}
-            className="particle"
-            style={{ left: `${10 + particle * 11}%`, top: `${18 + (particle % 4) * 15}%` }}
-            animate={reduceMotion ? undefined : { y: [0, -8, 0], opacity: [0.18, 0.45, 0.18] }}
-            transition={{ duration: 10 + particle, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        ))}
-      </div>
+
+      {variant === 'hero' ? (
+        <AuroraArc reduceMotion={reduceMotion} />
+      ) : null}
+
+      <motion.div
+        className="aurora-bloom aurora-bloom--indigo"
+        animate={reduceMotion ? undefined : { x: [0, 42, 0], y: [0, -26, 0] }}
+        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="aurora-bloom aurora-bloom--violet"
+        animate={reduceMotion ? undefined : { x: [0, -36, 0], y: [0, 30, 0] }}
+        transition={{ duration: 38, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="aurora-bloom aurora-bloom--teal"
+        animate={reduceMotion ? undefined : { opacity: [0.55, 1, 0.55], scale: [1, 1.12, 1] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+      />
     </div>
   );
 }
@@ -249,7 +515,8 @@ export function Navbar({ activeSection = 'home' }) {
               exit={{ opacity: 0, x: 10 }}
               transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
-              <PrimaryButton href={OPTISTUDY_MOCK_SITE_URL} target="_blank" rel="noreferrer" className="nav-cta">Launch OptiStudy</PrimaryButton>
+              <SecondaryButton href={OPTISTUDY_DEMO_URL} className="nav-demo" {...EXTERNAL_LINK_PROPS}>See the demo</SecondaryButton>
+              <PrimaryButton href={WAITLIST_URL} className="nav-cta">Join the waitlist</PrimaryButton>
             </motion.div>
           )}
         </AnimatePresence>
@@ -261,32 +528,54 @@ export function Navbar({ activeSection = 'home' }) {
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
+  const sectionRef = React.useRef(null);
+
+  /*
+   * The copy drifts up and dissolves as the aurora stays put, so the hero
+   * hands the page over instead of scrolling away as one flat slab.
+   */
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, 96]);
+  const copyOpacity = useTransform(scrollYProgress, [0, 0.72], [1, 0]);
+
+  const enter = (delay) => ({
+    initial: reduceMotion ? false : { opacity: 0, y: 26 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.9, delay, ease: EASE },
+  });
 
   return (
-    <section id="home" className="hero-shell">
+    <section id="home" className="hero-shell" ref={sectionRef}>
       <BackgroundEffects variant="hero" />
-      <div className="hero-hemisphere" aria-hidden="true" />
       <div className="hero-center">
-        <motion.div className="hero-copy" initial={reduceMotion ? false : { opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div className="hero-copy" style={reduceMotion ? undefined : { y: copyY, opacity: copyOpacity }}>
           <div className="hero-title-wrap">
             <h1 className="hero-title">
-              <span>Intelligence.</span>
-              <span>Innovation.</span>
-              <span>Vision.</span>
-              <span>Optimization.</span>
+              {HERO_LINES.map((line, index) => (
+                <motion.span key={line} {...enter(index * 0.09)}>
+                  {line}
+                </motion.span>
+              ))}
             </h1>
-            <div className="headline-glow" aria-hidden="true" />
           </div>
 
-          <p className="hero-body">IIVO creates intelligent software that helps people learn better and achieve more.</p>
+          <motion.p className="hero-body" {...enter(0.46)}>
+            IIVO creates intelligent software that helps people learn better and achieve more.
+          </motion.p>
 
-          <div className="hero-actions">
-            <PrimaryButton href={OPTISTUDY_MOCK_SITE_URL} target="_blank" rel="noreferrer">Explore OptiStudy</PrimaryButton>
-            <SecondaryButton href="join-waitlist.html">Join Waitlist</SecondaryButton>
+          <motion.div className="hero-actions" {...enter(0.55)}>
+            <PrimaryButton href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>See the demo</PrimaryButton>
+            <SecondaryButton href={WAITLIST_URL}>Join the waitlist</SecondaryButton>
             <SecondaryButton href="#about">Learn About IIVO</SecondaryButton>
-          </div>
+          </motion.div>
 
-          <p className="hero-note">Built with purpose. Designed for the future.</p>
+          <motion.div className="hero-pilot-wrap" {...enter(0.63)}>
+            <PilotAccessLink className="hero-pilot-link" />
+          </motion.div>
+
+          <motion.p className="hero-note" {...enter(0.7)}>
+            Built with purpose. Designed for the future.
+          </motion.p>
         </motion.div>
       </div>
     </section>
@@ -304,7 +593,7 @@ export function About() {
   return (
     <section id="about" className="section-shell">
       <div className="section-inner">
-        <GlassCard className="about-shell" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.75 }}>
+        <GlassCard className="about-shell" {...reveal(0, 28)}>
           <div className="about-grid">
             <div className="about-copy">
               <p className="section-kicker">ABOUT IIVO</p>
@@ -316,11 +605,11 @@ export function About() {
               {cards.map((card, index) => {
                 const Icon = card.icon;
                 return (
-                  <motion.article key={card.title} className="about-mini-card glass-panel" initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.68, delay: index * 0.06 }} whileHover={{ y: -8 }}>
+                  <TiltCard key={card.title} className="about-mini-card glass-panel" delay={index * 0.08} distance={22}>
                     <Icon size={22} />
                     <h3>{card.title}</h3>
                     <p>{card.description}</p>
-                  </motion.article>
+                  </TiltCard>
                 );
               })}
             </div>
@@ -328,6 +617,104 @@ export function About() {
         </GlassCard>
       </div>
     </section>
+  );
+}
+
+/*
+ * A still life of the product, drawn in markup rather than shipped as a
+ * screenshot: it stays sharp at any size, themes with the site, and weighs
+ * nothing. It is deliberately generic — the demo is where the real UI lives.
+ */
+function ProductPreview() {
+  const reduceMotion = useReducedMotion();
+
+  const sessions = [
+    { subject: 'Physics', title: 'Wave interference recap', time: '09:30', tone: 'indigo' },
+    { subject: 'Math', title: 'Integration by parts drill', time: '11:00', tone: 'violet' },
+    { subject: 'Chemistry', title: 'Organic reactions recall', time: '15:45', tone: 'teal' },
+  ];
+
+  /*
+   * The panel walks its own plan while you read: attention moves down the
+   * sessions the way a student's would, so the still life is never still.
+   */
+  const [activeSession, setActiveSession] = React.useState(0);
+
+  React.useEffect(() => {
+    if (reduceMotion) {
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => {
+      setActiveSession((current) => (current + 1) % sessions.length);
+    }, 2600);
+
+    return () => window.clearInterval(timer);
+  }, [reduceMotion, sessions.length]);
+
+  return (
+    <motion.div className="app-frame" {...reveal(0.1, 30)}>
+      <div className="app-frame-bar">
+        <span className="app-dot" />
+        <span className="app-dot" />
+        <span className="app-dot" />
+        <p>OptiStudy</p>
+      </div>
+
+      <div className="app-frame-body">
+        <aside className="app-rail" aria-hidden="true">
+          {[0, 1, 2, 3, 4].map((item) => (
+            <span key={item} className={`app-rail-item ${item === 0 ? 'is-active' : ''}`} />
+          ))}
+        </aside>
+
+        <div className="app-canvas">
+          <div className="app-canvas-head">
+            <div>
+              <p className="app-eyebrow">Today</p>
+              <h4>Your plan is ready</h4>
+            </div>
+            <span className="app-chip">
+              <span className="live-dot" aria-hidden="true" />
+              3 sessions
+            </span>
+          </div>
+
+          <ul className="app-sessions">
+            {sessions.map((session, index) => (
+              <li key={session.title} className={index === activeSession ? 'is-active' : ''}>
+                <span className={`app-tone app-tone--${session.tone}`} aria-hidden="true" />
+                <div>
+                  <strong>{session.title}</strong>
+                  <span>{session.subject}</span>
+                </div>
+                <em>{session.time}</em>
+              </li>
+            ))}
+          </ul>
+
+          <div className="app-metrics">
+            <div className="app-metric">
+              <p className="app-eyebrow">Week progress</p>
+              <div className="app-bar">
+                <motion.span
+                  initial={reduceMotion ? false : { width: 0 }}
+                  whileInView={{ width: '72%' }}
+                  viewport={{ once: true, amount: 0.6 }}
+                  transition={{ duration: 1.6, ease: EASE, delay: 0.3 }}
+                />
+              </div>
+              <strong>72%</strong>
+            </div>
+
+            <div className="app-metric">
+              <p className="app-eyebrow">Focus streak</p>
+              <strong className="app-metric-figure">12 days</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -339,16 +726,25 @@ export function Product() {
       <div className="section-inner">
         <div className="product-shell glass-panel">
           <div className="product-grid">
-            <motion.div className="product-copy" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.75 }}>
+            <motion.div className="product-copy" {...reveal(0, 24)}>
               <p className="section-kicker">OptiStudy</p>
               <h2 className="section-title">Your AI-powered academic workspace.</h2>
               <ul className="product-list">
-                {features.map((item) => (
-                  <li key={item}><span className="product-bullet" aria-hidden="true"><CircleCheckBig size={14} /></span><span>{item}</span></li>
+                {features.map((item, index) => (
+                  <motion.li key={item} {...reveal(index * 0.06, 14)}>
+                    <span className="product-bullet" aria-hidden="true"><CircleCheckBig size={14} /></span>
+                    <span>{item}</span>
+                  </motion.li>
                 ))}
               </ul>
-              <PrimaryButton href={OPTISTUDY_MOCK_SITE_URL} target="_blank" rel="noreferrer" className="mt-8">Explore OptiStudy</PrimaryButton>
+              <div className="product-actions">
+                <PrimaryButton href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>See the demo</PrimaryButton>
+                <PilotAccessLink />
+              </div>
+              <p className="product-actions-note">The demo is a live preview with sample data — no sign-up needed. The full app is open to our pilot roster.</p>
             </motion.div>
+
+            <ProductPreview />
           </div>
         </div>
       </div>
@@ -375,11 +771,11 @@ export function Features() {
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (
-              <motion.article key={card.title} className="feature-card glass-panel" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.68, delay: index * 0.05 }} whileHover={{ y: -8, scale: 1.01 }}>
+              <TiltCard key={card.title} className="feature-card glass-panel" delay={index * 0.07} distance={24}>
                 <Icon size={20} />
                 <h3>{card.title}</h3>
                 <p>{card.description}</p>
-              </motion.article>
+              </TiltCard>
             );
           })}
         </div>
@@ -391,8 +787,9 @@ export function Features() {
 export function CTA() {
   return (
     <section id="waitlist" className="section-shell">
+      <BackgroundEffects variant="section" />
       <div className="section-inner">
-        <motion.div className="cta-banner glass-panel" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.76 }}>
+        <motion.div className="cta-banner glass-panel" {...reveal(0, 28)}>
           <div className="cta-inner">
             <div>
               <p className="section-kicker">Closing CTA</p>
@@ -431,6 +828,9 @@ export function Footer() {
             <div>
               <h3>Product</h3>
               <a href="#optistudy">OptiStudy</a>
+              <a href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>Live demo</a>
+              <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>Open the app (pilot)</a>
+              <a href={WAITLIST_URL}>Join the waitlist</a>
             </div>
             <div>
               <h3>Legal</h3>
