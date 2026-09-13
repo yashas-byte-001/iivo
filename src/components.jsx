@@ -201,22 +201,58 @@ export function SecondaryButton({ children, href, className = '', ...props }) {
 }
 
 /*
- * The app is open to the approved pilot roster only. The link stays visible to
- * everyone — the app meets anyone else with its own closed-pilot page — but it
- * is always labelled so nobody clicks it expecting general access.
+ * The one decision every visitor has to make, put in front of them as two
+ * doors rather than a button and a footnote. Pilot users kept opening the demo
+ * and typing their credentials into it, so each door says who it is for, and
+ * the demo door says outright that pilot credentials do not work there.
+ *
+ * The pilot door stays visible to everyone: the app meets anyone who is not on
+ * the roster with its own closed-pilot page.
  */
-export function PilotAccessLink({ className = '' }) {
+export function OptiStudyPaths({ variant = 'hero', ...props }) {
+  const lift = { whileHover: { y: -3 }, whileTap: { scale: 0.99 } };
+
   return (
-    <motion.a
-      href={OPTISTUDY_APP_URL}
-      className={`pilot-link ${className}`}
-      whileHover={{ y: -1 }}
-      {...EXTERNAL_LINK_PROPS}
-    >
-      <ShieldCheck size={14} />
-      <span>Pilot user? Open OptiStudy</span>
-      <ArrowUpRight size={14} />
-    </motion.a>
+    <div className={`path-chooser path-chooser--${variant}`} {...props}>
+      <motion.a href={OPTISTUDY_APP_URL} className="path-card path-card--pilot" {...lift} {...EXTERNAL_LINK_PROPS}>
+        <span className="path-badge">
+          <ShieldCheck size={13} />
+          Pilot users
+        </span>
+        <span className="path-title">
+          Open OptiStudy
+          <ArrowUpRight size={18} />
+        </span>
+        <span className="path-copy">
+          <strong>The real app.</strong> Sign in with the pilot credentials we sent you.
+        </span>
+      </motion.a>
+
+      <motion.a href={OPTISTUDY_DEMO_URL} className="path-card path-card--demo" {...lift} {...EXTERNAL_LINK_PROPS}>
+        <span className="path-badge">
+          <Eye size={13} />
+          Everyone else
+        </span>
+        <span className="path-title">
+          Try the demo
+          <ArrowUpRight size={18} />
+        </span>
+        <span className="path-copy">
+          <strong>A mock preview</strong> with sample data. No sign-in needed &mdash; pilot credentials won&rsquo;t work here.
+        </span>
+      </motion.a>
+    </div>
+  );
+}
+
+/* Sits in the nav so pilot users never have to hunt for the real app. */
+export function PilotNavButton() {
+  return (
+    <SecondaryButton href={OPTISTUDY_APP_URL} className="nav-pilot" {...EXTERNAL_LINK_PROPS}>
+      <ShieldCheck size={15} />
+      <span className="nav-pilot-label">Pilot sign-in</span>
+      <span className="nav-pilot-label-short" aria-hidden="true">Pilot</span>
+    </SecondaryButton>
   );
 }
 
@@ -515,7 +551,7 @@ export function Navbar({ activeSection = 'home' }) {
               exit={{ opacity: 0, x: 10 }}
               transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
-              <SecondaryButton href={OPTISTUDY_DEMO_URL} className="nav-demo" {...EXTERNAL_LINK_PROPS}>See the demo</SecondaryButton>
+              <PilotNavButton />
               <PrimaryButton href={WAITLIST_URL} className="nav-cta">Join the waitlist</PrimaryButton>
             </motion.div>
           )}
@@ -531,12 +567,12 @@ export function Hero() {
   const sectionRef = React.useRef(null);
 
   /*
-   * The copy drifts up and dissolves as the aurora stays put, so the hero
-   * hands the page over instead of scrolling away as one flat slab.
+   * The copy drifts up a little slower than the page as the aurora stays put.
+   * It never fades: people scroll to reach the doors below the title, and a
+   * link that dissolves while you are aiming for it looks disabled.
    */
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, 96]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.72], [1, 0]);
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, 56]);
 
   const enter = (delay) => ({
     initial: reduceMotion ? false : { opacity: 0, y: 26 },
@@ -548,7 +584,7 @@ export function Hero() {
     <section id="home" className="hero-shell" ref={sectionRef}>
       <BackgroundEffects variant="hero" />
       <div className="hero-center">
-        <motion.div className="hero-copy" style={reduceMotion ? undefined : { y: copyY, opacity: copyOpacity }}>
+        <motion.div className="hero-copy" style={reduceMotion ? undefined : { y: copyY }}>
           <div className="hero-title-wrap">
             <h1 className="hero-title">
               {HERO_LINES.map((line, index) => (
@@ -563,14 +599,13 @@ export function Hero() {
             IIVO creates intelligent software that helps people learn better and achieve more.
           </motion.p>
 
-          <motion.div className="hero-actions" {...enter(0.55)}>
-            <PrimaryButton href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>See the demo</PrimaryButton>
-            <SecondaryButton href={WAITLIST_URL}>Join the waitlist</SecondaryButton>
-            <SecondaryButton href="#about">Learn About IIVO</SecondaryButton>
+          <motion.div {...enter(0.55)}>
+            <OptiStudyPaths />
           </motion.div>
 
-          <motion.div className="hero-pilot-wrap" {...enter(0.63)}>
-            <PilotAccessLink className="hero-pilot-link" />
+          <motion.div className="hero-actions" {...enter(0.63)}>
+            <SecondaryButton href={WAITLIST_URL}>Join the waitlist</SecondaryButton>
+            <a href="#about" className="hero-text-link">Learn about IIVO</a>
           </motion.div>
 
           <motion.p className="hero-note" {...enter(0.7)}>
@@ -737,11 +772,7 @@ export function Product() {
                   </motion.li>
                 ))}
               </ul>
-              <div className="product-actions">
-                <PrimaryButton href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>See the demo</PrimaryButton>
-                <PilotAccessLink />
-              </div>
-              <p className="product-actions-note">The demo is a live preview with sample data — no sign-up needed. The full app is open to our pilot roster.</p>
+              <OptiStudyPaths variant="product" />
             </motion.div>
 
             <ProductPreview />
@@ -828,8 +859,8 @@ export function Footer() {
             <div>
               <h3>Product</h3>
               <a href="#optistudy">OptiStudy</a>
-              <a href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>Live demo</a>
-              <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>Open the app (pilot)</a>
+              <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>Pilot sign-in (real app)</a>
+              <a href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>Public demo (mock)</a>
               <a href={WAITLIST_URL}>Join the waitlist</a>
             </div>
             <div>

@@ -353,7 +353,7 @@ button { font: inherit; }
   z-index: 1;
   width: min(960px, 100%);
   text-align: center;
-  margin-top: clamp(11rem, 24vh, 15.5rem);
+  margin-top: clamp(8.5rem, 17vh, 12rem);
 }
 
 .hero-title-wrap {
@@ -390,9 +390,10 @@ button { font: inherit; }
 .hero-actions {
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 0.9rem;
-  margin-top: 2rem;
+  gap: 0.9rem 1.4rem;
+  margin-top: 1.3rem;
 }
 
 .hero-note {
@@ -1526,7 +1527,7 @@ button { font: inherit; }
 
   .hero-center { min-height: calc(100vh - 5rem); }
 
-  .hero-copy { margin-top: clamp(10rem, 26vh, 13.5rem); }
+  .hero-copy { margin-top: clamp(8rem, 18vh, 11rem); }
 
   /* On a small screen the arc reads as a band across the top, not a dome. */
   .aurora-arc {
@@ -1605,57 +1606,157 @@ button { font: inherit; }
     scroll-margin-top: 6rem;
   }
 }
-/* OptiStudy destinations: demo (open to all) and pilot app access */
-.pilot-link {
+/* ============================================================
+   OptiStudy doors: the real app (pilot) vs. the public demo (mock)
+   ============================================================ */
+
+/*
+ * Two doors of equal size, but only one is lit. The pilot door carries the
+ * aurora so it reads as "the real thing"; the demo door is plain glass.
+ */
+.path-chooser {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  width: min(46rem, 100%);
+  margin: 2.1rem auto 0;
+  text-align: left;
+}
+
+.path-chooser--product {
+  width: 100%;
+  margin-top: 1.9rem;
+}
+
+.path-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  padding: 1.15rem 1.25rem 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+  will-change: transform;
+}
+
+.path-card--demo:hover {
+  border-color: var(--border-strong);
+  background: var(--card-hover);
+}
+
+.path-card--pilot {
+  border-color: rgba(142, 163, 255, 0.5);
+  background: linear-gradient(160deg, rgba(79, 107, 255, 0.24), rgba(160, 92, 255, 0.14) 60%, rgba(255, 255, 255, 0.03));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.16) inset,
+    0 16px 44px rgba(79, 107, 255, 0.22);
+}
+
+.path-card--pilot:hover {
+  border-color: rgba(190, 203, 255, 0.85);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 20px 56px rgba(79, 107, 255, 0.34);
+}
+
+.path-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.9rem;
+  gap: 0.4rem;
+  width: fit-content;
+  padding: 0.3rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.86rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
-}
-
-.pilot-link:hover {
-  color: white;
-  border-color: rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-.hero-pilot-link { margin-top: 1.4rem; }
+.path-card--pilot .path-badge {
+  border-color: rgba(190, 203, 255, 0.45);
+  background: rgba(79, 107, 255, 0.3);
+  color: #eef1ff;
+}
 
-.product-actions {
+.path-title {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.9rem;
-  margin-top: 2rem;
+  gap: 0.4rem;
+  font-size: 1.14rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
-.product-actions-note {
-  margin: 1rem 0 0;
-  max-width: 34rem;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.88rem;
-  line-height: 1.6;
+.path-title svg {
+  opacity: 0.6;
+  transition: transform 180ms ease, opacity 180ms ease;
 }
 
-.nav-demo {
+.path-card:hover .path-title svg {
+  transform: translate(2px, -2px);
+  opacity: 1;
+}
+
+.path-copy {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.path-card--pilot .path-copy { color: rgba(226, 231, 255, 0.8); }
+
+.path-copy strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Beneath the doors: the softer asks. */
+.hero-text-link {
+  padding: 0.4rem 0.2rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.94rem;
+  font-weight: 500;
+  transition: color 180ms ease;
+}
+
+.hero-text-link:hover { color: white; }
+
+/* The nav keeps a door to the real app at every scroll position. */
+.nav-pilot {
   min-height: 2.8rem;
-  padding-inline: 1rem;
+  padding-inline: 0.95rem;
+  gap: 0.45rem;
   font-size: 0.9rem;
+  border-color: rgba(142, 163, 255, 0.4);
+  color: #e6ebff;
 }
+
+.nav-pilot:hover { border-color: rgba(190, 203, 255, 0.75); }
+
+.nav-pilot-label-short { display: none; }
 
 @media (max-width: 720px) {
-  .nav-demo { display: none; }
+  .nav-pilot {
+    min-height: 2.45rem;
+    padding-inline: 0.75rem;
+    font-size: 0.84rem;
+  }
 
-  .product-actions,
+  .nav-pilot-label { display: none; }
+  .nav-pilot-label-short { display: inline; }
+
   .hero-actions { width: 100%; }
+}
+
+@media (max-width: 600px) {
+  .path-chooser { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -1665,7 +1766,6 @@ button { font: inherit; }
 /* Content always sits above the light rig. */
 .section-shell > .section-inner { position: relative; z-index: 1; }
 .hero-shell { isolation: isolate; }
-.hero-pilot-wrap { display: flex; justify-content: center; }
 
 /* Navigation: hairline pill over the dark, tighter labels. */
 .floating-nav.is-scrolled {
