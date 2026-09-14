@@ -115,9 +115,9 @@ export default function WaitlistPopup() {
           <span>OptiStudy waitlist is open</span>
         </div>
 
-        <h2 id="waitlist-popup-title">The OptiStudy waitlist is now open.</h2>
+        <h2 id="waitlist-popup-title">OptiStudy is in pilot. The waitlist is open.</h2>
         <p id="waitlist-popup-description">
-          Visitors can join now to reserve an early spot. If you already signed up, use the already joined button to view your waitlist details.
+          Join now to reserve a spot in the next cohort. Already signed up? Check your waitlist details instead.
         </p>
 
         <div className="waitlist-popup-actions">

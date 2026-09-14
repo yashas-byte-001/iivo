@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -17,173 +9,71 @@ import {
   CircleCheckBig,
   ClipboardList,
   Eye,
-  Github,
   GraduationCap,
-  Linkedin,
   Mail,
+  Menu,
   MessageCircleMore,
+  MonitorDown,
   ShieldCheck,
   Sparkles,
   Stars,
-  TimerReset,
-  TrendingUp,
-  Zap,
+  Users,
+  X,
 } from 'lucide-react';
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_URL, OPTISTUDY_DEMO_URL, WAITLIST_URL } from './config/links';
 
-const NAV_SCROLL_COLLAPSE_AT = 72;
-const NAV_SCROLL_EXPAND_AT = 28;
-
-/* One easing family for the whole site; mirrors --ease in styles.css. */
 const EASE = [0.16, 1, 0.3, 1];
-const HERO_LINES = ['Intelligence.', 'Innovation.', 'Vision.', 'Optimization.'];
 
-/* Reveals share a shape so sections feel like one system, not six animations. */
-const reveal = (delay = 0, distance = 26) => ({
-  initial: { opacity: 0, y: distance },
+/*
+ * The site map. Nav, mobile sheet and footer all read from this so a section
+ * can never be reachable from one and missing from another.
+ */
+export const SECTIONS = [
+  { id: 'home', label: 'Home', hint: 'Start here' },
+  { id: 'access', label: 'Get access', hint: 'Waitlist → pilot → install' },
+  { id: 'about', label: 'About', hint: 'Who we are' },
+  { id: 'optistudy', label: 'OptiStudy', hint: 'The product' },
+  { id: 'install', label: 'Get the app', hint: 'Install on any device' },
+  { id: 'waitlist', label: 'Waitlist', hint: 'Reserve a spot' },
+  { id: 'contact', label: 'Contact', hint: 'Reach us' },
+];
+
+const NAV_LINKS = SECTIONS.filter((section) => section.id !== 'home');
+
+/* One reveal shape for every section, so the page scrolls as one system. */
+const reveal = (delay = 0) => ({
+  initial: { opacity: 0, y: 14 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.25 },
-  transition: { duration: 0.85, delay, ease: EASE },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.6, delay, ease: EASE },
 });
+
 const JoinWaitlistTeaser = React.lazy(() => import('./components/JoinWaitlistTeaser'));
 
 function useMediaQuery(query) {
-  const getMatches = React.useCallback(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    return window.matchMedia(query).matches;
-  }, [query]);
-
+  const getMatches = React.useCallback(() => (typeof window === 'undefined' ? false : window.matchMedia(query).matches), [query]);
   const [matches, setMatches] = React.useState(getMatches);
 
   React.useEffect(() => {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
     const mediaQuery = window.matchMedia(query);
     const handleChange = (event) => setMatches(event.matches);
-
     setMatches(mediaQuery.matches);
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-
-    mediaQuery.addListener(handleChange);
-    return () => mediaQuery.removeListener(handleChange);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, [query]);
 
   return matches;
 }
 
-/* A hairline of the same light, tracking how far through the page you are. */
-export function ScrollProgress() {
-  const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
-
-  if (reduceMotion) {
-    return null;
-  }
-
-  return <motion.div className="scroll-progress" style={{ scaleX }} aria-hidden="true" />;
-}
-
-const TILT_SPRING = { stiffness: 150, damping: 18, mass: 0.6 };
-
-/*
- * A card that leans toward the cursor and lights up under it. The rotation runs
- * through motion values rather than CSS custom properties because framer owns
- * the transform on these elements — fighting it from CSS just loses.
- */
-function TiltCard({ className = '', delay = 0, distance = 24, children }) {
-  const reduceMotion = useReducedMotion();
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const rotateX = useSpring(useTransform(pointerY, [-0.5, 0.5], [7, -7]), TILT_SPRING);
-  const rotateY = useSpring(useTransform(pointerX, [-0.5, 0.5], [-9, 9]), TILT_SPRING);
-
-  const handleMove = (event) => {
-    if (reduceMotion) {
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const localX = event.clientX - rect.left;
-    const localY = event.clientY - rect.top;
-
-    pointerX.set(localX / rect.width - 0.5);
-    pointerY.set(localY / rect.height - 0.5);
-
-    /* The spotlight gradient reads these two. */
-    event.currentTarget.style.setProperty('--mx', `${localX}px`);
-    event.currentTarget.style.setProperty('--my', `${localY}px`);
-  };
-
-  const handleLeave = () => {
-    pointerX.set(0);
-    pointerY.set(0);
-  };
-
-  return (
-    <motion.article
-      className={className}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      style={reduceMotion ? undefined : { rotateX, rotateY, transformPerspective: 1000 }}
-      {...reveal(delay, distance)}
-    >
-      {children}
-    </motion.article>
-  );
-}
-
-export function SectionTitle({ kicker, title, description, align = 'left' }) {
-  return (
-    <div className={`max-w-4xl ${align === 'center' ? 'mx-auto text-center' : ''}`}>
-      <p className="section-kicker">{kicker}</p>
-      <h2 className="section-title">{title}</h2>
-      {description ? <p className="section-copy mt-6">{description}</p> : null}
-    </div>
-  );
-}
-
-export function GlassCard({ className = '', children, ...props }) {
-  return (
-    <motion.div className={`glass-panel ${className}`} {...props}>
-      {children}
-    </motion.div>
-  );
-}
-
-export function FloatingCard({ className = '', children, delay = 0, floating = true, ...props }) {
-  const reduceMotion = useReducedMotion();
-  return (
-    <motion.div
-      className={`glass-panel floating-card ${className}`}
-      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.35 }}
-      transition={{ duration: 0.75, delay, ease: [0.16, 1, 0.3, 1] }}
-      animate={reduceMotion || !floating ? undefined : { y: [0, -8, 0] }}
-      style={reduceMotion || !floating ? undefined : { animationDuration: '8s' }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
 
 export function PrimaryButton({ children, href, className = '', ...props }) {
-  const Tag = href ? motion.a : motion.button;
-
+  const Tag = href ? 'a' : 'button';
   return (
-    <Tag href={href} className={`primary-button ${className}`} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} {...props}>
+    <Tag href={href} className={`primary-button ${className}`} {...props}>
       <span>{children}</span>
       <ArrowRight size={16} />
     </Tag>
@@ -191,12 +81,20 @@ export function PrimaryButton({ children, href, className = '', ...props }) {
 }
 
 export function SecondaryButton({ children, href, className = '', ...props }) {
-  const Tag = href ? motion.a : motion.button;
-
+  const Tag = href ? 'a' : 'button';
   return (
-    <Tag href={href} className={`secondary-button ${className}`} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} {...props}>
+    <Tag href={href} className={`secondary-button ${className}`} {...props}>
       {children}
     </Tag>
+  );
+}
+
+/* Purple means "opens the OptiStudy app". Nothing else on the site is purple. */
+export function OptiButton({ children, href = OPTISTUDY_APP_URL, className = '', ghost = false, ...props }) {
+  return (
+    <a href={href} className={`opti-button ${ghost ? 'opti-button--ghost' : ''} ${className}`} {...EXTERNAL_LINK_PROPS} {...props}>
+      {children}
+    </a>
   );
 }
 
@@ -205,490 +103,338 @@ export function SecondaryButton({ children, href, className = '', ...props }) {
  * doors rather than a button and a footnote. Pilot users kept opening the demo
  * and typing their credentials into it, so each door says who it is for, and
  * the demo door says outright that pilot credentials do not work there.
- *
- * The pilot door stays visible to everyone: the app meets anyone who is not on
- * the roster with its own closed-pilot page.
  */
 export function OptiStudyPaths({ variant = 'hero', ...props }) {
-  const lift = { whileHover: { y: -3 }, whileTap: { scale: 0.99 } };
-
   return (
     <div className={`path-chooser path-chooser--${variant}`} {...props}>
-      <motion.a href={OPTISTUDY_APP_URL} className="path-card path-card--pilot" {...lift} {...EXTERNAL_LINK_PROPS}>
+      <a href={OPTISTUDY_APP_URL} className="path-card path-card--pilot" {...EXTERNAL_LINK_PROPS}>
         <span className="path-badge">
           <ShieldCheck size={13} />
           Pilot users
         </span>
         <span className="path-title">
           Open OptiStudy
-          <ArrowUpRight size={18} />
+          <ArrowUpRight size={20} />
         </span>
         <span className="path-copy">
           <strong>The real app.</strong> Sign in with the pilot credentials we sent you.
         </span>
-      </motion.a>
+      </a>
 
-      <motion.a href={OPTISTUDY_DEMO_URL} className="path-card path-card--demo" {...lift} {...EXTERNAL_LINK_PROPS}>
+      <a href={OPTISTUDY_DEMO_URL} className="path-card path-card--demo" {...EXTERNAL_LINK_PROPS}>
         <span className="path-badge">
           <Eye size={13} />
           Everyone else
         </span>
         <span className="path-title">
           Try the demo
-          <ArrowUpRight size={18} />
+          <ArrowUpRight size={20} />
         </span>
         <span className="path-copy">
-          <strong>A mock preview</strong> with sample data. No sign-in needed &mdash; pilot credentials won&rsquo;t work here.
+          <strong>A preview with sample data.</strong> No sign-in needed &mdash; pilot credentials won&rsquo;t work here.
         </span>
-      </motion.a>
+      </a>
     </div>
   );
 }
 
-/* Sits in the nav so pilot users never have to hunt for the real app. */
-export function PilotNavButton() {
-  return (
-    <SecondaryButton href={OPTISTUDY_APP_URL} className="nav-pilot" {...EXTERNAL_LINK_PROPS}>
-      <ShieldCheck size={15} />
-      <span className="nav-pilot-label">Pilot sign-in</span>
-      <span className="nav-pilot-label-short" aria-hidden="true">Pilot</span>
-    </SecondaryButton>
-  );
+/* Kept for the join pages, which render it behind their form. */
+export function BackgroundEffects() {
+  return <div className="background-effects" aria-hidden="true" />;
 }
 
-function JoinWaitlistTeaserFallback() {
-  return (
-    <div className="waitlist-teaser">
-      <p className="waitlist-teaser-label">Join the waitlist</p>
-      <p className="waitlist-teaser-copy">Continue to the dedicated join page to sign in first and complete your profile.</p>
-      <PrimaryButton href={WAITLIST_URL} className="waitlist-teaser-button" aria-label="Join the waitlist">
-        Join waitlist
-      </PrimaryButton>
-    </div>
-  );
-}
-
-export function AnimatedGrid() {
-  return <div className="aurora-grid" aria-hidden="true" />;
-}
-
-/* One ellipse, three passes: wide spill, soft halo, hairline core. */
-const AURORA_PATH = 'M -120 760 A 860 700 0 0 1 1560 760';
-
-/*
- * Lights that travel the orbits. Each rides the upper half of one ellipse, so
- * it enters from the dark at one edge and leaves at the other — the ring is
- * only ever lit where something is moving along it.
- */
-const ORBITERS = [
-  { id: 'outer', path: 'M -340 910 A 1060 860 0 0 1 1780 910', duration: 34, delay: 0, size: 2.6, trail: 13 },
-  { id: 'mid', path: 'M -260 910 A 980 800 0 0 1 1700 910', duration: 26, delay: -9, size: 3.2, trail: 16 },
-  { id: 'inner', path: 'M 0 910 A 720 585 0 0 1 1440 910', duration: 19, delay: -14, size: 2.2, trail: 11 },
-];
-
-/* Fixed, not random: a rebuild should not reshuffle the sky. */
-const STAR_DUST = [
-  { id: 1, x: 180, y: 150, r: 1.4, duration: 7, delay: 0 },
-  { id: 2, x: 420, y: 96, r: 1, duration: 9, delay: -2 },
-  { id: 3, x: 980, y: 128, r: 1.2, duration: 8, delay: -4 },
-  { id: 4, x: 1240, y: 208, r: 1.5, duration: 11, delay: -1 },
-  { id: 5, x: 620, y: 62, r: 1, duration: 10, delay: -6 },
-  { id: 6, x: 1340, y: 92, r: 1.1, duration: 9, delay: -3 },
-  { id: 7, x: 96, y: 300, r: 1.2, duration: 12, delay: -5 },
-  { id: 8, x: 1180, y: 340, r: 1, duration: 8, delay: -7 },
-];
-
-function AuroraArc({ reduceMotion }) {
-  return (
-    <motion.svg
-      className="aurora-svg"
-      viewBox="0 0 1440 900"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-      animate={reduceMotion ? undefined : { opacity: [0.85, 1, 0.85] }}
-      transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-    >
-      <defs>
-        <linearGradient id="aurora-rim" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0" />
-          <stop offset="16%" stopColor="#4f6bff" stopOpacity="0.5" />
-          <stop offset="38%" stopColor="#eaf0ff" stopOpacity="0.95" />
-          <stop offset="58%" stopColor="#dfe6ff" stopOpacity="0.9" />
-          <stop offset="82%" stopColor="#a05cff" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#a05cff" stopOpacity="0" />
-        </linearGradient>
-
-        <linearGradient id="aurora-spill" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0" />
-          <stop offset="22%" stopColor="#4f6bff" stopOpacity="0.55" />
-          <stop offset="45%" stopColor="#2fe6c9" stopOpacity="0.28" />
-          <stop offset="70%" stopColor="#a05cff" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#a05cff" stopOpacity="0" />
-        </linearGradient>
-
-        <radialGradient id="aurora-pool" cx="50%" cy="0%" r="70%">
-          <stop offset="0%" stopColor="#6076ff" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#6076ff" stopOpacity="0" />
-        </radialGradient>
-
-        <linearGradient id="orbit-stroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0" />
-          <stop offset="30%" stopColor="#8ea3ff" stopOpacity="0.22" />
-          <stop offset="50%" stopColor="#dfe6ff" stopOpacity="0.32" />
-          <stop offset="70%" stopColor="#b08cff" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="#a05cff" stopOpacity="0" />
-        </linearGradient>
-
-        <linearGradient id="comet-stroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#4f6bff" stopOpacity="0.1" />
-          <stop offset="45%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#a05cff" stopOpacity="0.1" />
-        </linearGradient>
-
-        <radialGradient id="orbiter-halo">
-          <stop offset="0%" stopColor="#cfd9ff" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#cfd9ff" stopOpacity="0" />
-        </radialGradient>
-
-        <filter id="aurora-soft" x="-25%" y="-70%" width="150%" height="280%">
-          <feGaussianBlur stdDeviation="34" />
-        </filter>
-        <filter id="aurora-tight" x="-15%" y="-45%" width="130%" height="220%">
-          <feGaussianBlur stdDeviation="7" />
-        </filter>
-      </defs>
-
-      {/* Light pooling under the ribbon, so it sits in space rather than on top of it. */}
-      <ellipse cx="720" cy="300" rx="540" ry="130" fill="url(#aurora-pool)" filter="url(#aurora-soft)" opacity="0.55" />
-
-      {/*
-       * Orbits share the arc's centre, so the rings read as paths around the
-       * same body the horizon light belongs to. Only their crowns clear the
-       * fold; the rest is below the viewport, which is what sells the scale.
-       */}
-      <g className="orbit-rings">
-        <ellipse cx="720" cy="910" rx="1060" ry="860" fill="none" stroke="url(#orbit-stroke)" strokeWidth="1" opacity="0.5" />
-        <ellipse cx="720" cy="910" rx="980" ry="800" fill="none" stroke="url(#orbit-stroke)" strokeWidth="1" opacity="0.7" />
-        <ellipse cx="720" cy="910" rx="720" ry="585" fill="none" stroke="url(#orbit-stroke)" strokeWidth="1" opacity="0.55" />
-      </g>
-
-      <path d={AURORA_PATH} fill="none" stroke="url(#aurora-spill)" strokeWidth="56" filter="url(#aurora-soft)" opacity="0.65" />
-      <path d={AURORA_PATH} fill="none" stroke="url(#aurora-rim)" strokeWidth="12" filter="url(#aurora-tight)" opacity="0.75" />
-      <path d={AURORA_PATH} fill="none" stroke="url(#aurora-rim)" strokeWidth="1.6" opacity="0.95" />
-
-      {!reduceMotion && (
-        <>
-          {/*
-           * A short bright segment chases the horizon line. Animating the dash
-           * offset rather than moving an element means the light follows the
-           * curve exactly, and the browser does it on the compositor.
-           */}
-          <path
-            className="arc-comet"
-            d={AURORA_PATH}
-            fill="none"
-            stroke="url(#comet-stroke)"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeDasharray="150 4000"
-          />
-
-          {ORBITERS.map((orbiter) => (
-            <g key={orbiter.id}>
-              <circle r={orbiter.trail} fill="url(#orbiter-halo)" opacity="0.5">
-                <animateMotion dur={`${orbiter.duration}s`} begin={`${orbiter.delay}s`} repeatCount="indefinite" path={orbiter.path} />
-              </circle>
-              <circle r={orbiter.size} fill="#f2f5ff" filter="url(#aurora-tight)">
-                <animateMotion dur={`${orbiter.duration}s`} begin={`${orbiter.delay}s`} repeatCount="indefinite" path={orbiter.path} />
-              </circle>
-            </g>
-          ))}
-
-          <g className="star-dust">
-            {STAR_DUST.map((star) => (
-              <circle key={star.id} cx={star.x} cy={star.y} r={star.r} fill="#dfe6ff" opacity="0.4">
-                <animate
-                  attributeName="opacity"
-                  values="0.12;0.55;0.12"
-                  dur={`${star.duration}s`}
-                  begin={`${star.delay}s`}
-                  repeatCount="indefinite"
-                />
-              </circle>
-            ))}
-          </g>
-        </>
-      )}
-    </motion.svg>
-  );
-}
-
-/*
- * Obsidian Aurora: a single ribbon of light plus its spill. The arc breathes,
- * the blooms drift, nothing else moves. Every loop is long, slow and runs on
- * transform/opacity only, so the rig stays cheap and stops under reduced motion.
- */
-export function BackgroundEffects({ variant = 'hero' }) {
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <div className={`background-effects background-${variant}`} aria-hidden="true">
-      <AnimatedGrid />
-
-      {variant === 'hero' ? (
-        <AuroraArc reduceMotion={reduceMotion} />
-      ) : null}
-
-      <motion.div
-        className="aurora-bloom aurora-bloom--indigo"
-        animate={reduceMotion ? undefined : { x: [0, 42, 0], y: [0, -26, 0] }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="aurora-bloom aurora-bloom--violet"
-        animate={reduceMotion ? undefined : { x: [0, -36, 0], y: [0, 30, 0] }}
-        transition={{ duration: 38, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="aurora-bloom aurora-bloom--teal"
-        animate={reduceMotion ? undefined : { opacity: [0.55, 1, 0.55], scale: [1, 1.12, 1] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-      />
-    </div>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Navigation                                                          */
+/* ------------------------------------------------------------------ */
 
 export function Navbar({ activeSection = 'home' }) {
-  const reduceMotion = useReducedMotion();
-  const isCompactViewport = useMediaQuery('(max-width: 720px)');
+  const isCompact = useMediaQuery('(max-width: 1024px)');
   const [scrolled, setScrolled] = React.useState(false);
-  const [navExpanded, setNavExpanded] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (isCompactViewport) {
-      setScrolled(false);
-      setNavExpanded(false);
-      return undefined;
-    }
+    const update = () => setScrolled(window.scrollY > 8);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
 
-    const updateScrolledState = () => {
-      const value = window.scrollY;
-      setScrolled((current) => (current ? value > NAV_SCROLL_EXPAND_AT : value > NAV_SCROLL_COLLAPSE_AT));
+  /* The sheet only exists on small screens; closing it when the viewport grows
+     stops it lingering invisibly with the page scroll locked. */
+  React.useEffect(() => {
+    if (!isCompact) setOpen(false);
+  }, [isCompact]);
+
+  React.useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (!open) return undefined;
+
+    const onKey = (event) => {
+      if (event.key === 'Escape') setOpen(false);
     };
-
-    updateScrolledState();
-    window.addEventListener('scroll', updateScrolledState, { passive: true });
-
-    return () => window.removeEventListener('scroll', updateScrolledState);
-  }, [isCompactViewport]);
-
-  React.useEffect(() => {
-    if (!scrolled || isCompactViewport) {
-      setNavExpanded(false);
-    }
-  }, [scrolled, isCompactViewport]);
-
-  const links = [
-    { label: 'Home', href: '#home' },
-    { label: 'About IIVO', href: '#about' },
-    { label: 'OptiStudy', href: '#optistudy' },
-    { label: 'Our Vision', href: '#why-optistudy' },
-    { label: 'Contact', href: '#footer' },
-  ];
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [open]);
 
   return (
-    <motion.header
-      className={`floating-nav-shell ${scrolled ? 'is-scrolled' : 'is-top'} ${navExpanded ? 'is-expanded' : 'is-collapsed'}`}
-      initial={reduceMotion ? false : { opacity: 0, y: -12 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={reduceMotion ? undefined : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <motion.nav
-        className={`floating-nav glass-pill ${scrolled ? 'is-scrolled' : 'is-hero'} ${navExpanded ? 'is-expanded' : 'is-collapsed'}`}
-        aria-label="Primary navigation"
-        transition={reduceMotion ? undefined : { type: 'spring', stiffness: 360, damping: 34, mass: 0.95 }}
-      >
-        {scrolled && !isCompactViewport ? (
+    <>
+      <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
+        <div className="site-nav-inner">
+          <a href="#home" className="brand-markup" onClick={() => setOpen(false)}>
+            IIVO
+          </a>
+
+          <nav className="nav-links" aria-label="Primary">
+            {NAV_LINKS.map((link) => (
+              <a key={link.id} href={`#${link.id}`} className={activeSection === link.id ? 'is-active' : ''}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="nav-actions">
+            <OptiButton ghost className="button--sm">
+              <ShieldCheck size={15} />
+              Pilot sign-in
+            </OptiButton>
+            <PrimaryButton href={WAITLIST_URL} className="button--sm">
+              Join the waitlist
+            </PrimaryButton>
+          </div>
+
           <button
             type="button"
-            className="brand-markup nav-brand-button"
-            aria-label={navExpanded ? 'Collapse navigation' : 'Expand navigation'}
-            aria-expanded={navExpanded}
-            onClick={() => setNavExpanded((value) => !value)}
+            className="nav-toggle"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen((value) => !value)}
           >
-            IIVO
+            {open ? <X size={20} /> : <Menu size={20} />}
           </button>
-        ) : (
-          <a href="#home" className="brand-markup">IIVO</a>
-        )}
+        </div>
+      </header>
 
-        <AnimatePresence initial={false}>
-          {!isCompactViewport && (!scrolled || navExpanded) && (
-            <motion.div
-              key="nav-links"
-              className="nav-links nav-links-desktop"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {links.map((link) => (
-                <a key={link.label} href={link.href} className={activeSection === link.href.slice(1) ? 'is-active' : ''}>
-                  {link.label}
-                </a>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence initial={false}>
-          {(!scrolled || navExpanded || isCompactViewport) && (
-            <motion.div
-              key="nav-actions"
-              className="nav-actions"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <PilotNavButton />
-              <PrimaryButton href={WAITLIST_URL} className="nav-cta">Join the waitlist</PrimaryButton>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-      </motion.nav>
-    </motion.header>
+      <div id="mobile-menu" className={`nav-sheet ${open ? 'is-open' : ''}`} hidden={!open}>
+        <nav className="nav-sheet-links" aria-label="Sections">
+          {SECTIONS.map((link) => (
+            <a key={link.id} href={`#${link.id}`} onClick={() => setOpen(false)}>
+              {link.label}
+              <span>{link.hint}</span>
+            </a>
+          ))}
+        </nav>
+        <div className="nav-sheet-actions">
+          <OptiButton>
+            <ShieldCheck size={16} />
+            Pilot sign-in — open OptiStudy
+          </OptiButton>
+          <PrimaryButton href={WAITLIST_URL}>Join the waitlist</PrimaryButton>
+          <SecondaryButton href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>
+            Try the public demo
+          </SecondaryButton>
+        </div>
+      </div>
+    </>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
-  const sectionRef = React.useRef(null);
-
-  /*
-   * The copy drifts up a little slower than the page as the aurora stays put.
-   * It never fades: people scroll to reach the doors below the title, and a
-   * link that dissolves while you are aiming for it looks disabled.
-   */
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, 56]);
 
   const enter = (delay) => ({
-    initial: reduceMotion ? false : { opacity: 0, y: 26 },
+    initial: reduceMotion ? false : { opacity: 0, y: 18 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.9, delay, ease: EASE },
+    transition: { duration: 0.8, delay, ease: EASE },
   });
 
   return (
-    <section id="home" className="hero-shell" ref={sectionRef}>
-      <BackgroundEffects variant="hero" />
-      <div className="hero-center">
-        <motion.div className="hero-copy" style={reduceMotion ? undefined : { y: copyY }}>
-          <div className="hero-title-wrap">
-            <h1 className="hero-title">
-              {HERO_LINES.map((line, index) => (
-                <motion.span key={line} {...enter(index * 0.09)}>
-                  {line}
-                </motion.span>
-              ))}
-            </h1>
-          </div>
+    <section id="home" className="hero-shell">
+      <BackgroundEffects />
+      <div className="hero-inner">
+        <motion.a href="#access" className="status-pill" {...enter(0)}>
+          <span className="live-dot" aria-hidden="true" />
+          <strong>OptiStudy is live in pilot</strong>
+          <em>Waitlist open for the next cohort</em>
+        </motion.a>
 
-          <motion.p className="hero-body" {...enter(0.46)}>
-            IIVO creates intelligent software that helps people learn better and achieve more.
-          </motion.p>
+        <motion.h1 className="hero-title" {...enter(0.08)}>
+          Intelligent software that helps people <em>learn better</em> and achieve more.
+        </motion.h1>
 
-          <motion.div {...enter(0.55)}>
-            <OptiStudyPaths />
-          </motion.div>
+        <motion.p className="hero-body" {...enter(0.16)}>
+          IIVO builds tools for students. Our first product, OptiStudy, is an AI-powered academic workspace &mdash; now in a closed pilot,
+          with the waitlist open for everyone else.
+        </motion.p>
 
-          <motion.div className="hero-actions" {...enter(0.63)}>
-            <SecondaryButton href={WAITLIST_URL}>Join the waitlist</SecondaryButton>
-            <a href="#about" className="hero-text-link">Learn about IIVO</a>
-          </motion.div>
-
-          <motion.p className="hero-note" {...enter(0.7)}>
-            Built with purpose. Designed for the future.
-          </motion.p>
+        <motion.div {...enter(0.24)} style={{ width: '100%' }}>
+          <OptiStudyPaths />
         </motion.div>
+
+        <motion.div className="hero-actions" {...enter(0.32)}>
+          <PrimaryButton href={WAITLIST_URL} className="button--lg">
+            Join the waitlist
+          </PrimaryButton>
+          <SecondaryButton href="#install" className="button--lg">
+            <MonitorDown size={16} />
+            How to install the app
+          </SecondaryButton>
+        </motion.div>
+
+        <motion.p className="hero-foot" {...enter(0.4)}>
+          <span>Works on iPhone, Android, Windows, macOS and Linux</span>
+          <span>No app store needed</span>
+        </motion.p>
       </div>
     </section>
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* How access works                                                    */
+/* ------------------------------------------------------------------ */
+
+export function AccessSteps() {
+  const steps = [
+    {
+      icon: Users,
+      title: 'Join the waitlist',
+      body: 'Sign in and tell us a little about yourself. It takes a minute, and your spot stays tied to your account.',
+      link: { label: 'Join now', href: WAITLIST_URL },
+    },
+    {
+      icon: Mail,
+      title: 'Get your pilot invite',
+      body: 'We open OptiStudy to new cohorts in waves. When it is your turn, we email pilot credentials to the address you signed up with.',
+      link: { label: 'Try the demo meanwhile', href: OPTISTUDY_DEMO_URL, external: true },
+    },
+    {
+      icon: MonitorDown,
+      title: 'Install and sign in',
+      body: 'Add OptiStudy to your phone, tablet or computer in a few taps, then sign in with your pilot credentials.',
+      link: { label: 'Installation guide', href: '#install' },
+    },
+  ];
+
+  return (
+    <section id="access" className="section-shell section-shell--alt section-shell--rule">
+      <div className="section-inner">
+        <div className="section-head section-head--split">
+          <div>
+            <p className="section-kicker">How access works</p>
+            <h2 className="section-title">OptiStudy is rolling out in cohorts.</h2>
+          </div>
+          <p className="section-copy">
+            We are onboarding students in small groups so every pilot user gets real attention. Three steps take you from the waitlist
+            to the app on your own device.
+          </p>
+        </div>
+
+        <div className="access-steps">
+          {steps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <motion.article key={step.title} className="access-step" {...reveal(index * 0.08)}>
+                <div className="access-step-index">
+                  <span>0{index + 1}</span>
+                  <Icon size={20} />
+                </div>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+                <a href={step.link.href} className="text-link" {...(step.link.external ? EXTERNAL_LINK_PROPS : {})}>
+                  {step.link.label}
+                  <ArrowRight size={14} />
+                </a>
+              </motion.article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* About                                                               */
+/* ------------------------------------------------------------------ */
+
 export function About() {
-  const cards = [
-    { title: 'Intelligence', icon: BrainCircuit, description: 'Systems that interpret context and turn it into clear next steps.' },
-    { title: 'Innovation', icon: Sparkles, description: 'Quiet product design that feels modern without becoming loud.' },
-    { title: 'Vision', icon: Eye, description: 'A brand frame that can grow into a wider platform over time.' },
-    { title: 'Optimization', icon: CircleCheckBig, description: 'Less friction, cleaner flows, and better follow-through every day.' },
+  const values = [
+    { title: 'Intelligence', icon: BrainCircuit, description: 'Systems that read context and turn it into a clear next step.' },
+    { title: 'Innovation', icon: Sparkles, description: 'Product design that feels modern without ever becoming loud.' },
+    { title: 'Vision', icon: Eye, description: 'A foundation that can grow into a wider learning platform over time.' },
+    { title: 'Optimization', icon: CircleCheckBig, description: 'Less friction, cleaner flows and better follow-through every day.' },
   ];
 
   return (
     <section id="about" className="section-shell">
       <div className="section-inner">
-        <GlassCard className="about-shell" {...reveal(0, 28)}>
-          <div className="about-grid">
-            <div className="about-copy">
-              <p className="section-kicker">ABOUT IIVO</p>
-              <h2 className="section-title">We are IIVO.</h2>
-              <p className="section-copy mt-6">IIVO creates intelligent software that helps people learn better and achieve more.</p>
-            </div>
+        <div className="about-grid">
+          <motion.div className="about-copy" {...reveal()}>
+            <p className="section-kicker">About IIVO</p>
+            <h2 className="section-title">We are IIVO.</h2>
+            <p className="section-copy">
+              IIVO creates intelligent software that helps people learn better and achieve more. We are a small team building for
+              students first, starting with the hours they spend planning, studying and keeping track of it all.
+            </p>
+            <p className="section-copy">
+              The name is the four things we hold ourselves to: Intelligence, Innovation, Vision, Optimization.
+            </p>
+          </motion.div>
 
-            <div className="about-cards">
-              {cards.map((card, index) => {
-                const Icon = card.icon;
-                return (
-                  <TiltCard key={card.title} className="about-mini-card glass-panel" delay={index * 0.08} distance={22}>
-                    <Icon size={22} />
-                    <h3>{card.title}</h3>
-                    <p>{card.description}</p>
-                  </TiltCard>
-                );
-              })}
-            </div>
+          <div className="about-list">
+            {values.map((value, index) => {
+              const Icon = value.icon;
+              return (
+                <motion.div key={value.title} className="about-item" {...reveal(index * 0.06)}>
+                  <Icon size={20} />
+                  <h3>{value.title}</h3>
+                  <p>{value.description}</p>
+                </motion.div>
+              );
+            })}
           </div>
-        </GlassCard>
+        </div>
       </div>
     </section>
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* OptiStudy                                                           */
+/* ------------------------------------------------------------------ */
+
 /*
- * A still life of the product, drawn in markup rather than shipped as a
- * screenshot: it stays sharp at any size, themes with the site, and weighs
- * nothing. It is deliberately generic — the demo is where the real UI lives.
+ * A still life of the product, drawn in the app's own dark purple so a visitor
+ * sees what OptiStudy looks like before they open it. Deliberately generic —
+ * the demo is where the real UI lives.
  */
 function ProductPreview() {
   const reduceMotion = useReducedMotion();
 
   const sessions = [
-    { subject: 'Physics', title: 'Wave interference recap', time: '09:30', tone: 'indigo' },
-    { subject: 'Math', title: 'Integration by parts drill', time: '11:00', tone: 'violet' },
-    { subject: 'Chemistry', title: 'Organic reactions recall', time: '15:45', tone: 'teal' },
+    { subject: 'Physics', title: 'Wave interference recap', time: '09:30', tone: 'lavender' },
+    { subject: 'Math', title: 'Integration by parts drill', time: '11:00', tone: 'rose' },
+    { subject: 'Chemistry', title: 'Organic reactions recall', time: '15:45', tone: 'amber' },
   ];
 
-  /*
-   * The panel walks its own plan while you read: attention moves down the
-   * sessions the way a student's would, so the still life is never still.
-   */
   const [activeSession, setActiveSession] = React.useState(0);
 
   React.useEffect(() => {
-    if (reduceMotion) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setActiveSession((current) => (current + 1) % sessions.length);
-    }, 2600);
-
+    if (reduceMotion) return undefined;
+    const timer = window.setInterval(() => setActiveSession((current) => (current + 1) % sessions.length), 2600);
     return () => window.clearInterval(timer);
   }, [reduceMotion, sessions.length]);
 
   return (
-    <motion.div className="app-frame" {...reveal(0.1, 30)}>
+    <motion.div className="app-frame" {...reveal(0.1)} aria-hidden="true">
       <div className="app-frame-bar">
         <span className="app-dot" />
         <span className="app-dot" />
@@ -697,7 +443,7 @@ function ProductPreview() {
       </div>
 
       <div className="app-frame-body">
-        <aside className="app-rail" aria-hidden="true">
+        <aside className="app-rail">
           {[0, 1, 2, 3, 4].map((item) => (
             <span key={item} className={`app-rail-item ${item === 0 ? 'is-active' : ''}`} />
           ))}
@@ -710,15 +456,14 @@ function ProductPreview() {
               <h4>Your plan is ready</h4>
             </div>
             <span className="app-chip">
-              <span className="live-dot" aria-hidden="true" />
-              3 sessions
+              <span className="live-dot" />3 sessions
             </span>
           </div>
 
           <ul className="app-sessions">
             {sessions.map((session, index) => (
               <li key={session.title} className={index === activeSession ? 'is-active' : ''}>
-                <span className={`app-tone app-tone--${session.tone}`} aria-hidden="true" />
+                <span className={`app-tone app-tone--${session.tone}`} />
                 <div>
                   <strong>{session.title}</strong>
                   <span>{session.subject}</span>
@@ -736,15 +481,14 @@ function ProductPreview() {
                   initial={reduceMotion ? false : { width: 0 }}
                   whileInView={{ width: '72%' }}
                   viewport={{ once: true, amount: 0.6 }}
-                  transition={{ duration: 1.6, ease: EASE, delay: 0.3 }}
+                  transition={{ duration: 1.4, ease: EASE, delay: 0.3 }}
                 />
               </div>
               <strong>72%</strong>
             </div>
-
             <div className="app-metric">
               <p className="app-eyebrow">Focus streak</p>
-              <strong className="app-metric-figure">12 days</strong>
+              <strong>12 days</strong>
             </div>
           </div>
         </div>
@@ -754,85 +498,86 @@ function ProductPreview() {
 }
 
 export function Product() {
-  const features = ['AI Study Planner', 'Smart Schedule & Calendar', 'Progress Tracking', 'AI Chat Assistant', 'Notes & Summaries', 'And much more...'];
+  const features = [
+    { title: 'AI study planner', body: 'Builds a daily structure from deadlines, workload and free time.', icon: ClipboardList },
+    { title: 'Smart schedule & calendar', body: 'Keeps classes, work and study blocks aligned without rework.', icon: CalendarDays },
+    { title: 'Progress tracking', body: 'Shows what is done, what is next and how much momentum is left.', icon: ChartNoAxesCombined },
+    { title: 'AI chat assistant', body: 'Answers questions about your own notes and unblocks next steps.', icon: MessageCircleMore },
+    { title: 'Notes & summaries', body: 'Turns long sessions into compact, useful study material.', icon: GraduationCap },
+    { title: 'And more on the way', body: 'The workspace keeps expanding as pilot feedback comes in.', icon: Stars },
+  ];
 
   return (
-    <section id="optistudy" className="section-shell opti-shell">
+    <section id="optistudy" className="section-shell section-shell--rule">
       <div className="section-inner">
-        <div className="product-shell glass-panel">
-          <div className="product-grid">
-            <motion.div className="product-copy" {...reveal(0, 24)}>
-              <p className="section-kicker">OptiStudy</p>
-              <h2 className="section-title">Your AI-powered academic workspace.</h2>
-              <ul className="product-list">
-                {features.map((item, index) => (
-                  <motion.li key={item} {...reveal(index * 0.06, 14)}>
-                    <span className="product-bullet" aria-hidden="true"><CircleCheckBig size={14} /></span>
-                    <span>{item}</span>
-                  </motion.li>
-                ))}
-              </ul>
-              <OptiStudyPaths variant="product" />
-            </motion.div>
+        <div className="product-grid">
+          <motion.div className="product-copy" {...reveal()}>
+            <p className="section-kicker section-kicker--opti">OptiStudy</p>
+            <h2 className="section-title">Your academic life, understood.</h2>
+            <p className="section-copy">
+              OptiStudy is an AI-powered academic workspace. Plan your study, ask questions about your own notes, and keep track of what
+              you have actually covered &mdash; in one place, on every device.
+            </p>
 
-            <ProductPreview />
-          </div>
+            <ul className="product-features">
+              {features.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <li key={feature.title}>
+                    <Icon size={18} />
+                    <div>
+                      <strong>{feature.title}</strong>
+                      <span>{feature.body}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <OptiStudyPaths variant="product" />
+          </motion.div>
+
+          <ProductPreview />
         </div>
       </div>
     </section>
   );
 }
 
-export function Features() {
-  const cards = [
-    { title: 'AI Study Planner', description: 'Builds a daily structure from deadlines, workload, and available time.', icon: ClipboardList },
-    { title: 'Smart Schedule & Calendar', description: 'Keeps classes, work, and study blocks aligned without manual rework.', icon: CalendarDays },
-    { title: 'Progress Tracking', description: 'Shows what is done, what is next, and how much momentum is left.', icon: ChartNoAxesCombined },
-    { title: 'AI Chat Assistant', description: 'Answers questions, unblocks next steps, and keeps the flow moving.', icon: MessageCircleMore },
-    { title: 'Notes & Summaries', description: 'Turns long sessions into compact, useful study material.', icon: GraduationCap },
-    { title: 'And much more...', description: 'A wider workspace that keeps expanding as the product evolves.', icon: Stars },
-  ];
+/* ------------------------------------------------------------------ */
+/* Waitlist                                                            */
+/* ------------------------------------------------------------------ */
 
+function JoinWaitlistTeaserFallback() {
   return (
-    <section id="why-optistudy" className="section-shell">
-      <div className="section-inner">
-        <SectionTitle kicker="Why OptiStudy" title="Everything you need to study smarter." />
-
-        <div className="features-grid">
-          {cards.map((card, index) => {
-            const Icon = card.icon;
-            return (
-              <TiltCard key={card.title} className="feature-card glass-panel" delay={index * 0.07} distance={24}>
-                <Icon size={20} />
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </TiltCard>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+    <div className="waitlist-teaser">
+      <p className="waitlist-teaser-label">Join the waitlist</p>
+      <p className="waitlist-teaser-copy">Continue to the join page to sign in and complete your profile.</p>
+      <PrimaryButton href={WAITLIST_URL} className="waitlist-teaser-button">
+        Join waitlist
+      </PrimaryButton>
+    </div>
   );
 }
 
 export function CTA() {
   return (
-    <section id="waitlist" className="section-shell">
-      <BackgroundEffects variant="section" />
+    <section id="waitlist" className="section-shell section-shell--alt section-shell--rule">
       <div className="section-inner">
-        <motion.div className="cta-banner glass-panel" {...reveal(0, 28)}>
-          <div className="cta-inner">
-            <div>
-              <p className="section-kicker">Closing CTA</p>
-              <h2 className="section-title">Ready to transform the way you study?</h2>
-              <p className="section-copy mt-6 max-w-3xl">Be among the first to experience OptiStudy — now live in testing with students shaping how it evolves.</p>
-            </div>
+        <motion.div className="cta-banner" {...reveal()}>
+          <div>
+            <p className="section-kicker">Waitlist</p>
+            <h2 className="section-title">Ready to change the way you study?</h2>
+            <p className="section-copy">
+              Be among the first to use OptiStudy. Pilot cohorts are invited from the waitlist in order, and every invite comes with
+              credentials for the real app.
+            </p>
+          </div>
 
-            <div className="waitlist-panel waitlist-panel--teaser">
-              <React.Suspense fallback={<JoinWaitlistTeaserFallback />}>
-                <JoinWaitlistTeaser />
-              </React.Suspense>
-            </div>
+          <div className="waitlist-panel">
+            <React.Suspense fallback={<JoinWaitlistTeaserFallback />}>
+              <JoinWaitlistTeaser />
+            </React.Suspense>
           </div>
         </motion.div>
       </div>
@@ -840,44 +585,62 @@ export function CTA() {
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
 export function Footer() {
   return (
-    <footer id="footer" className="footer-shell">
+    <footer id="contact" className="footer-shell">
       <div className="section-inner">
-        <div className="footer-divider" />
         <div className="footer-layout">
           <div className="footer-brand">
             <div className="footer-wordmark">IIVO</div>
-            <p>Intelligence. Innovation. Vision. Optimization.</p>
+            <p>Intelligence. Innovation. Vision. Optimization. Intelligent software that helps people learn better and achieve more.</p>
+            <a href="mailto:iivo.contact1@gmail.com" className="text-link">
+              <Mail size={14} />
+              iivo.contact1@gmail.com
+            </a>
           </div>
 
           <div className="footer-links-grid">
             <div>
               <h3>Company</h3>
               <a href="#about">About IIVO</a>
+              <a href="#access">How access works</a>
+              <a href="#waitlist">Join the waitlist</a>
             </div>
             <div>
-              <h3>Product</h3>
-              <a href="#optistudy">OptiStudy</a>
-              <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>Pilot sign-in (real app)</a>
-              <a href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>Public demo (mock)</a>
-              <a href={WAITLIST_URL}>Join the waitlist</a>
+              <h3>OptiStudy</h3>
+              <a href="#optistudy">Overview</a>
+              <a href={OPTISTUDY_APP_URL} className="is-opti" {...EXTERNAL_LINK_PROPS}>
+                Pilot sign-in (real app)
+              </a>
+              <a href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>
+                Public demo
+              </a>
+              <a href="#install">Install the app</a>
+            </div>
+            <div>
+              <h3>Social</h3>
+              <a href="https://www.youtube.com/@IIVO-t5q" {...EXTERNAL_LINK_PROPS}>
+                YouTube
+              </a>
+              <a href="https://www.instagram.com/iivo.tech/" {...EXTERNAL_LINK_PROPS}>
+                Instagram
+              </a>
             </div>
             <div>
               <h3>Legal</h3>
               <a href="privacy.html">Privacy Policy</a>
               <a href="terms.html">Terms of Service</a>
             </div>
-            <div>
-              <h3>Social</h3>
-              <a href="https://www.youtube.com/@IIVO-t5q" target="_blank" rel="noreferrer">YouTube</a>
-              <a href="https://www.instagram.com/iivo.tech/" target="_blank" rel="noreferrer">Instagram</a>
-            </div>
-            <div className="footer-contact-column">
-              <h3>Contact</h3>
-              <a href="mailto:iivo.contact1@gmail.com">iivo.contact1@gmail.com</a>
-            </div>
           </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} IIVO. All rights reserved.</span>
+          <span>OptiStudy is currently in a closed pilot.</span>
         </div>
       </div>
     </footer>
