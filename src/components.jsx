@@ -9,19 +9,20 @@ import {
   CircleCheckBig,
   ClipboardList,
   Eye,
+  Globe,
   GraduationCap,
+  KeyRound,
   Mail,
   Menu,
   MessageCircleMore,
   MonitorDown,
-  ShieldCheck,
   Sparkles,
   Stars,
-  Users,
+  UserRoundPlus,
   X,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_URL, OPTISTUDY_DEMO_URL, WAITLIST_URL } from './config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL } from './config/links';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -31,15 +32,14 @@ const EASE = [0.16, 1, 0.3, 1];
  */
 export const SECTIONS = [
   { id: 'home', label: 'Home', hint: 'Start here' },
-  { id: 'access', label: 'Get access', hint: 'Waitlist → pilot → install' },
-  { id: 'about', label: 'About', hint: 'Who we are' },
+  { id: 'start', label: 'Get started', hint: 'Open, sign in, install' },
   { id: 'optistudy', label: 'OptiStudy', hint: 'The product' },
   { id: 'install', label: 'Get the app', hint: 'Install on any device' },
-  { id: 'waitlist', label: 'Waitlist', hint: 'Reserve a spot' },
+  { id: 'about', label: 'About', hint: 'Who we are' },
   { id: 'contact', label: 'Contact', hint: 'Reach us' },
 ];
 
-const NAV_LINKS = SECTIONS.filter((section) => section.id !== 'home');
+const NAV_LINKS = SECTIONS.filter((section) => section.id !== 'home' && section.id !== 'contact');
 
 /* One reveal shape for every section, so the page scrolls as one system. */
 const reveal = (delay = 0) => ({
@@ -48,8 +48,6 @@ const reveal = (delay = 0) => ({
   viewport: { once: true, amount: 0.2 },
   transition: { duration: 0.6, delay, ease: EASE },
 });
-
-const JoinWaitlistTeaser = React.lazy(() => import('./components/JoinWaitlistTeaser'));
 
 function useMediaQuery(query) {
   const getMatches = React.useCallback(() => (typeof window === 'undefined' ? false : window.matchMedia(query).matches), [query]);
@@ -89,56 +87,20 @@ export function SecondaryButton({ children, href, className = '', ...props }) {
   );
 }
 
-/* Purple means "opens the OptiStudy app". Nothing else on the site is purple. */
-export function OptiButton({ children, href = OPTISTUDY_APP_URL, className = '', ghost = false, ...props }) {
+/*
+ * Purple means "opens OptiStudy". Nothing else on the site is purple, and
+ * every purple control goes to the same address, so a visitor only ever has
+ * to learn one thing.
+ */
+export function OptiButton({ children, className = '', ghost = false, ...props }) {
   return (
-    <a href={href} className={`opti-button ${ghost ? 'opti-button--ghost' : ''} ${className}`} {...EXTERNAL_LINK_PROPS} {...props}>
+    <a href={OPTISTUDY_APP_URL} className={`opti-button ${ghost ? 'opti-button--ghost' : ''} ${className}`} {...EXTERNAL_LINK_PROPS} {...props}>
       {children}
     </a>
   );
 }
 
-/*
- * The one decision every visitor has to make, put in front of them as two
- * doors rather than a button and a footnote. Pilot users kept opening the demo
- * and typing their credentials into it, so each door says who it is for, and
- * the demo door says outright that pilot credentials do not work there.
- */
-export function OptiStudyPaths({ variant = 'hero', ...props }) {
-  return (
-    <div className={`path-chooser path-chooser--${variant}`} {...props}>
-      <a href={OPTISTUDY_APP_URL} className="path-card path-card--pilot" {...EXTERNAL_LINK_PROPS}>
-        <span className="path-badge">
-          <ShieldCheck size={13} />
-          Pilot users
-        </span>
-        <span className="path-title">
-          Open OptiStudy
-          <ArrowUpRight size={20} />
-        </span>
-        <span className="path-copy">
-          <strong>The real app.</strong> Sign in with the pilot credentials we sent you.
-        </span>
-      </a>
-
-      <a href={OPTISTUDY_DEMO_URL} className="path-card path-card--demo" {...EXTERNAL_LINK_PROPS}>
-        <span className="path-badge">
-          <Eye size={13} />
-          Everyone else
-        </span>
-        <span className="path-title">
-          Try the demo
-          <ArrowUpRight size={20} />
-        </span>
-        <span className="path-copy">
-          <strong>A preview with sample data.</strong> No sign-in needed &mdash; pilot credentials won&rsquo;t work here.
-        </span>
-      </a>
-    </div>
-  );
-}
-
-/* Kept for the join pages, which render it behind their form. */
+/* Kept for the hero, which renders it behind the launch card. */
 export function BackgroundEffects() {
   return <div className="background-effects" aria-hidden="true" />;
 }
@@ -195,26 +157,24 @@ export function Navbar({ activeSection = 'home' }) {
             ))}
           </nav>
 
+          {/* The launch button never hides behind the menu: on a phone it sits
+              beside the toggle so the product is one tap away from anywhere. */}
           <div className="nav-actions">
-            <OptiButton ghost className="button--sm">
-              <ShieldCheck size={15} />
-              Pilot sign-in
+            <OptiButton className="button--sm nav-launch">
+              Open OptiStudy
+              <ArrowUpRight size={15} />
             </OptiButton>
-            <PrimaryButton href={WAITLIST_URL} className="button--sm">
-              Join the waitlist
-            </PrimaryButton>
+            <button
+              type="button"
+              className="nav-toggle"
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              onClick={() => setOpen((value) => !value)}
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
-
-          <button
-            type="button"
-            className="nav-toggle"
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((value) => !value)}
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </div>
       </header>
 
@@ -228,23 +188,85 @@ export function Navbar({ activeSection = 'home' }) {
           ))}
         </nav>
         <div className="nav-sheet-actions">
-          <OptiButton>
-            <ShieldCheck size={16} />
-            Pilot sign-in — open OptiStudy
+          <OptiButton className="button--lg">
+            Open OptiStudy
+            <ArrowUpRight size={16} />
           </OptiButton>
-          <PrimaryButton href={WAITLIST_URL}>Join the waitlist</PrimaryButton>
-          <SecondaryButton href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>
-            Try the public demo
-          </SecondaryButton>
+          <p className="nav-sheet-note">
+            Free for everyone. Sign in or create your account inside the app at <strong>{OPTISTUDY_APP_HOST}</strong>.
+          </p>
         </div>
       </div>
     </>
   );
 }
 
+/*
+ * A launch bar pinned to the bottom of small screens once the hero has
+ * scrolled away. Whatever a visitor is reading, the product stays one tap
+ * away and the address stays in view.
+ */
+export function LaunchBar({ activeSection = 'home' }) {
+  const visible = activeSection !== 'home';
+  return (
+    <div className={`launch-bar ${visible ? 'is-visible' : ''}`} aria-hidden={!visible}>
+      <div className="launch-bar-text">
+        <strong>OptiStudy</strong>
+        <span>{OPTISTUDY_APP_HOST}</span>
+      </div>
+      <OptiButton className="button--sm" tabIndex={visible ? 0 : -1}>
+        Open
+        <ArrowUpRight size={15} />
+      </OptiButton>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
+
+/*
+ * The launch card is the whole point of the page. It shows the address,
+ * one big button, and says outright that accounts live inside the app,
+ * because visitors kept hunting this site for a login form.
+ */
+export function LaunchCard({ variant = 'hero' }) {
+  return (
+    <div className={`launch-card launch-card--${variant}`}>
+      <div className="launch-card-head">
+        <span className="launch-card-status">
+          <span className="live-dot" aria-hidden="true" />
+          Live &middot; open to everyone
+        </span>
+        <span className="launch-card-host">
+          <Globe size={14} />
+          {OPTISTUDY_APP_HOST}
+        </span>
+      </div>
+
+      <OptiButton className="button--xl launch-card-button">
+        Open OptiStudy
+        <ArrowUpRight size={20} />
+      </OptiButton>
+
+      <ul className="launch-card-facts">
+        <li>
+          <UserRoundPlus size={15} />
+          New here? Create your account in the app
+        </li>
+        <li>
+          <KeyRound size={15} />
+          Already have one? Sign in there too
+        </li>
+        <li>
+          <MonitorDown size={15} />
+          Works in any browser &mdash; <a href="#install">install it</a> for one-tap access
+        </li>
+      </ul>
+    </div>
+  );
+}
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
@@ -259,81 +281,85 @@ export function Hero() {
     <section id="home" className="hero-shell">
       <BackgroundEffects />
       <div className="hero-inner">
-        <motion.a href="#access" className="status-pill" {...enter(0)}>
-          <span className="live-dot" aria-hidden="true" />
-          <strong>OptiStudy is live in pilot</strong>
-          <em>Waitlist open for the next cohort</em>
-        </motion.a>
+        <div className="hero-copy">
+          <motion.p className="hero-kicker" {...enter(0)}>
+            IIVO presents OptiStudy
+          </motion.p>
 
-        <motion.h1 className="hero-title" {...enter(0.08)}>
-          Intelligent software that helps people <em>learn better</em> and achieve more.
-        </motion.h1>
+          <motion.h1 className="hero-title" {...enter(0.08)}>
+            Your studies, <em>planned and understood</em> by AI.
+          </motion.h1>
 
-        <motion.p className="hero-body" {...enter(0.16)}>
-          IIVO builds tools for students. Our first product, OptiStudy, is an AI-powered academic workspace &mdash; now in a closed pilot,
-          with the waitlist open for everyone else.
-        </motion.p>
+          <motion.p className="hero-body" {...enter(0.16)}>
+            OptiStudy is an AI-powered academic workspace that plans your study, answers questions about your own notes and keeps
+            track of what you have actually covered. It is now open to everyone &mdash; no waitlist, no invite.
+          </motion.p>
 
-        <motion.div {...enter(0.24)} style={{ width: '100%' }}>
-          <OptiStudyPaths />
+          <motion.p className="hero-foot" {...enter(0.32)}>
+            <span>Free to start</span>
+            <span>iPhone, Android, Windows, macOS &amp; Linux</span>
+            <span>No app store needed</span>
+          </motion.p>
+        </div>
+
+        <motion.div className="hero-launch" {...enter(0.24)}>
+          <LaunchCard />
         </motion.div>
-
-        <motion.div className="hero-actions" {...enter(0.32)}>
-          <PrimaryButton href={WAITLIST_URL} className="button--lg">
-            Join the waitlist
-          </PrimaryButton>
-          <SecondaryButton href="#install" className="button--lg">
-            <MonitorDown size={16} />
-            How to install the app
-          </SecondaryButton>
-        </motion.div>
-
-        <motion.p className="hero-foot" {...enter(0.4)}>
-          <span>Works on iPhone, Android, Windows, macOS and Linux</span>
-          <span>No app store needed</span>
-        </motion.p>
       </div>
     </section>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* How access works                                                    */
+/* Get started                                                         */
 /* ------------------------------------------------------------------ */
 
-export function AccessSteps() {
+export function GetStarted() {
   const steps = [
     {
-      icon: Users,
-      title: 'Join the waitlist',
-      body: 'Sign in and tell us a little about yourself. It takes a minute, and your spot stays tied to your account.',
-      link: { label: 'Join now', href: WAITLIST_URL },
+      icon: Globe,
+      title: 'Open OptiStudy',
+      body: (
+        <>
+          Go to <strong>{OPTISTUDY_APP_HOST}</strong> in any browser, or press the purple button anywhere on this page. That is the app.
+        </>
+      ),
+      link: { label: 'Open it now', href: OPTISTUDY_APP_URL, external: true },
     },
     {
-      icon: Mail,
-      title: 'Get your pilot invite',
-      body: 'We open OptiStudy to new cohorts in waves. When it is your turn, we email pilot credentials to the address you signed up with.',
-      link: { label: 'Try the demo meanwhile', href: OPTISTUDY_DEMO_URL, external: true },
+      icon: UserRoundPlus,
+      title: 'Create your account, or sign in',
+      body: (
+        <>
+          Everything to do with your account happens inside OptiStudy: signing up, signing in and resetting a password. There is
+          nothing to log into on this website.
+        </>
+      ),
+      link: { label: 'Go to sign-in', href: OPTISTUDY_APP_URL, external: true },
     },
     {
       icon: MonitorDown,
-      title: 'Install and sign in',
-      body: 'Add OptiStudy to your phone, tablet or computer in a few taps, then sign in with your pilot credentials.',
+      title: 'Install it, if you like',
+      body: (
+        <>
+          Add OptiStudy to your home screen, dock or taskbar in a few taps so it opens like a native app. Optional, but worth it.
+        </>
+      ),
       link: { label: 'Installation guide', href: '#install' },
     },
   ];
 
   return (
-    <section id="access" className="section-shell section-shell--alt section-shell--rule">
+    <section id="start" className="section-shell section-shell--alt section-shell--rule">
       <div className="section-inner">
         <div className="section-head section-head--split">
           <div>
-            <p className="section-kicker">How access works</p>
-            <h2 className="section-title">OptiStudy is rolling out in cohorts.</h2>
+            <p className="section-kicker">Get started</p>
+            <h2 className="section-title">Three steps. The first one is the only one you need.</h2>
           </div>
           <p className="section-copy">
-            We are onboarding students in small groups so every pilot user gets real attention. Three steps take you from the waitlist
-            to the app on your own device.
+            OptiStudy is a web app, so there is nothing to download first. Open it, make an account, and start planning. Installing it
+            on your device comes after, whenever you want.
           </p>
         </div>
 
@@ -348,59 +374,17 @@ export function AccessSteps() {
                 </div>
                 <h3>{step.title}</h3>
                 <p>{step.body}</p>
-                <a href={step.link.href} className="text-link" {...(step.link.external ? EXTERNAL_LINK_PROPS : {})}>
+                <a
+                  href={step.link.href}
+                  className={`text-link ${step.link.external ? 'text-link--opti' : ''}`}
+                  {...(step.link.external ? EXTERNAL_LINK_PROPS : {})}
+                >
                   {step.link.label}
-                  <ArrowRight size={14} />
+                  {step.link.external ? <ArrowUpRight size={14} /> : <ArrowRight size={14} />}
                 </a>
               </motion.article>
             );
           })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* About                                                               */
-/* ------------------------------------------------------------------ */
-
-export function About() {
-  const values = [
-    { title: 'Intelligence', icon: BrainCircuit, description: 'Systems that read context and turn it into a clear next step.' },
-    { title: 'Innovation', icon: Sparkles, description: 'Product design that feels modern without ever becoming loud.' },
-    { title: 'Vision', icon: Eye, description: 'A foundation that can grow into a wider learning platform over time.' },
-    { title: 'Optimization', icon: CircleCheckBig, description: 'Less friction, cleaner flows and better follow-through every day.' },
-  ];
-
-  return (
-    <section id="about" className="section-shell">
-      <div className="section-inner">
-        <div className="about-grid">
-          <motion.div className="about-copy" {...reveal()}>
-            <p className="section-kicker">About IIVO</p>
-            <h2 className="section-title">We are IIVO.</h2>
-            <p className="section-copy">
-              IIVO creates intelligent software that helps people learn better and achieve more. We are a small team building for
-              students first, starting with the hours they spend planning, studying and keeping track of it all.
-            </p>
-            <p className="section-copy">
-              The name is the four things we hold ourselves to: Intelligence, Innovation, Vision, Optimization.
-            </p>
-          </motion.div>
-
-          <div className="about-list">
-            {values.map((value, index) => {
-              const Icon = value.icon;
-              return (
-                <motion.div key={value.title} className="about-item" {...reveal(index * 0.06)}>
-                  <Icon size={20} />
-                  <h3>{value.title}</h3>
-                  <p>{value.description}</p>
-                </motion.div>
-              );
-            })}
-          </div>
         </div>
       </div>
     </section>
@@ -414,7 +398,7 @@ export function About() {
 /*
  * A still life of the product, drawn in the app's own dark purple so a visitor
  * sees what OptiStudy looks like before they open it. Deliberately generic —
- * the demo is where the real UI lives.
+ * the app itself is where the real UI lives.
  */
 function ProductPreview() {
   const reduceMotion = useReducedMotion();
@@ -439,7 +423,7 @@ function ProductPreview() {
         <span className="app-dot" />
         <span className="app-dot" />
         <span className="app-dot" />
-        <p>OptiStudy</p>
+        <p>{OPTISTUDY_APP_HOST}</p>
       </div>
 
       <div className="app-frame-body">
@@ -504,7 +488,7 @@ export function Product() {
     { title: 'Progress tracking', body: 'Shows what is done, what is next and how much momentum is left.', icon: ChartNoAxesCombined },
     { title: 'AI chat assistant', body: 'Answers questions about your own notes and unblocks next steps.', icon: MessageCircleMore },
     { title: 'Notes & summaries', body: 'Turns long sessions into compact, useful study material.', icon: GraduationCap },
-    { title: 'And more on the way', body: 'The workspace keeps expanding as pilot feedback comes in.', icon: Stars },
+    { title: 'And more on the way', body: 'The workspace keeps expanding as feedback comes in.', icon: Stars },
   ];
 
   return (
@@ -513,10 +497,10 @@ export function Product() {
         <div className="product-grid">
           <motion.div className="product-copy" {...reveal()}>
             <p className="section-kicker section-kicker--opti">OptiStudy</p>
-            <h2 className="section-title">Your academic life, understood.</h2>
+            <h2 className="section-title">Your academic life, in one place.</h2>
             <p className="section-copy">
-              OptiStudy is an AI-powered academic workspace. Plan your study, ask questions about your own notes, and keep track of what
-              you have actually covered &mdash; in one place, on every device.
+              Plan your study, ask questions about your own notes, and keep track of what you have actually covered &mdash; on every
+              device, from one account.
             </p>
 
             <ul className="product-features">
@@ -534,7 +518,16 @@ export function Product() {
               })}
             </ul>
 
-            <OptiStudyPaths variant="product" />
+            <div className="product-actions">
+              <OptiButton className="button--lg">
+                Open OptiStudy
+                <ArrowUpRight size={16} />
+              </OptiButton>
+              <SecondaryButton href="#install" className="button--lg">
+                <MonitorDown size={16} />
+                Install on your device
+              </SecondaryButton>
+            </div>
           </motion.div>
 
           <ProductPreview />
@@ -545,40 +538,70 @@ export function Product() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Waitlist                                                            */
+/* About                                                               */
 /* ------------------------------------------------------------------ */
 
-function JoinWaitlistTeaserFallback() {
+export function About() {
+  const values = [
+    { title: 'Intelligence', icon: BrainCircuit, description: 'Systems that read context and turn it into a clear next step.' },
+    { title: 'Innovation', icon: Sparkles, description: 'Product design that feels modern without ever becoming loud.' },
+    { title: 'Vision', icon: Eye, description: 'A foundation that can grow into a wider learning platform over time.' },
+    { title: 'Optimization', icon: CircleCheckBig, description: 'Less friction, cleaner flows and better follow-through every day.' },
+  ];
+
   return (
-    <div className="waitlist-teaser">
-      <p className="waitlist-teaser-label">Join the waitlist</p>
-      <p className="waitlist-teaser-copy">Continue to the join page to sign in and complete your profile.</p>
-      <PrimaryButton href={WAITLIST_URL} className="waitlist-teaser-button">
-        Join waitlist
-      </PrimaryButton>
-    </div>
+    <section id="about" className="section-shell section-shell--rule">
+      <div className="section-inner">
+        <div className="about-grid">
+          <motion.div className="about-copy" {...reveal()}>
+            <p className="section-kicker">About IIVO</p>
+            <h2 className="section-title">We are IIVO.</h2>
+            <p className="section-copy">
+              IIVO creates intelligent software that helps people learn better and achieve more. We are a small team building for
+              students first, starting with the hours they spend planning, studying and keeping track of it all.
+            </p>
+            <p className="section-copy">
+              The name is the four things we hold ourselves to: Intelligence, Innovation, Vision, Optimization.
+            </p>
+          </motion.div>
+
+          <div className="about-list">
+            {values.map((value, index) => {
+              const Icon = value.icon;
+              return (
+                <motion.div key={value.title} className="about-item" {...reveal(index * 0.06)}>
+                  <Icon size={20} />
+                  <h3>{value.title}</h3>
+                  <p>{value.description}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Final call to action                                                */
+/* ------------------------------------------------------------------ */
+
 export function CTA() {
   return (
-    <section id="waitlist" className="section-shell section-shell--alt section-shell--rule">
+    <section id="launch" className="section-shell section-shell--alt section-shell--rule">
       <div className="section-inner">
         <motion.div className="cta-banner" {...reveal()}>
           <div>
-            <p className="section-kicker">Waitlist</p>
-            <h2 className="section-title">Ready to change the way you study?</h2>
+            <p className="section-kicker section-kicker--opti">Ready when you are</p>
+            <h2 className="section-title">Open OptiStudy and start today.</h2>
             <p className="section-copy">
-              Be among the first to use OptiStudy. Pilot cohorts are invited from the waitlist in order, and every invite comes with
-              credentials for the real app.
+              It is free to start and open to everyone. Create your account inside the app, and it will be waiting for you on every
+              device you sign in from.
             </p>
           </div>
 
-          <div className="waitlist-panel">
-            <React.Suspense fallback={<JoinWaitlistTeaserFallback />}>
-              <JoinWaitlistTeaser />
-            </React.Suspense>
-          </div>
+          <LaunchCard variant="banner" />
         </motion.div>
       </div>
     </section>
@@ -605,21 +628,21 @@ export function Footer() {
 
           <div className="footer-links-grid">
             <div>
-              <h3>Company</h3>
-              <a href="#about">About IIVO</a>
-              <a href="#access">How access works</a>
-              <a href="#waitlist">Join the waitlist</a>
+              <h3>OptiStudy</h3>
+              <a href={OPTISTUDY_APP_URL} className="is-opti" {...EXTERNAL_LINK_PROPS}>
+                Open OptiStudy
+              </a>
+              <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>
+                Sign in / create account
+              </a>
+              <a href="#optistudy">Overview</a>
+              <a href="#install">Install the app</a>
             </div>
             <div>
-              <h3>OptiStudy</h3>
-              <a href="#optistudy">Overview</a>
-              <a href={OPTISTUDY_APP_URL} className="is-opti" {...EXTERNAL_LINK_PROPS}>
-                Pilot sign-in (real app)
-              </a>
-              <a href={OPTISTUDY_DEMO_URL} {...EXTERNAL_LINK_PROPS}>
-                Public demo
-              </a>
-              <a href="#install">Install the app</a>
+              <h3>Company</h3>
+              <a href="#about">About IIVO</a>
+              <a href="#start">Get started</a>
+              <a href="mailto:iivo.contact1@gmail.com">Contact</a>
             </div>
             <div>
               <h3>Social</h3>
@@ -640,7 +663,12 @@ export function Footer() {
 
         <div className="footer-bottom">
           <span>&copy; {new Date().getFullYear()} IIVO. All rights reserved.</span>
-          <span>OptiStudy is currently in a closed pilot.</span>
+          <span>
+            OptiStudy lives at{' '}
+            <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>
+              {OPTISTUDY_APP_HOST}
+            </a>
+          </span>
         </div>
       </div>
     </footer>

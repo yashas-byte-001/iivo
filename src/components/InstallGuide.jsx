@@ -19,10 +19,10 @@ import {
   Zap,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_URL } from '../config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL } from '../config/links';
 
 const EASE = [0.16, 1, 0.3, 1];
-const APP_HOST = OPTISTUDY_APP_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const APP_HOST = OPTISTUDY_APP_HOST;
 
 /* A small picture of the control the step is talking about. */
 function Glyph({ icon: Icon, label }) {
@@ -59,7 +59,7 @@ const PLATFORMS = [
         title: 'Open OptiStudy in Safari',
         body: (
           <>
-            Go to <Label>{APP_HOST}</Label>. You don&rsquo;t need to sign in before installing.
+            Go to <Label>{APP_HOST}</Label>. You can install before or after signing in.
           </>
         ),
       },
@@ -457,9 +457,9 @@ export default function InstallGuide() {
               <div className="install-card install-card--opti">
                 <h4>
                   <Info size={16} />
-                  Install from the real app
+                  Install from this address
                 </h4>
-                <p>Use this address when you install. The public demo is a separate site with sample data and can&rsquo;t be signed into.</p>
+                <p>Every step above starts by opening OptiStudy. This is the only address you need.</p>
                 <span className="install-url">{APP_HOST}</span>
                 <a href={OPTISTUDY_APP_URL} className="opti-button" {...EXTERNAL_LINK_PROPS}>
                   Open OptiStudy to install
@@ -473,8 +473,8 @@ export default function InstallGuide() {
                   Good to know
                 </h4>
                 <ul>
-                  <li>Installing is free and takes a few seconds. You&rsquo;ll still need pilot credentials to sign in.</li>
-                  <li>Not on the pilot yet? Join the waitlist below and install once your invite arrives.</li>
+                  <li>Installing is free and takes a few seconds. You can sign in before or after &mdash; it makes no difference.</li>
+                  <li>Your account is the same everywhere. Sign in on a second device and everything is already there.</li>
                   <li>
                     To remove it: on a phone, press and hold the icon and choose Remove or Uninstall. On desktop, open the app&rsquo;s own
                     menu and pick Uninstall OptiStudy.

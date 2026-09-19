@@ -1,18 +1,14 @@
 /*
- * Single source of truth for the OptiStudy destinations.
+ * Single source of truth for where OptiStudy lives.
  *
- * There are two very different products behind these links, and visitors must
- * never be confused about which one they are opening:
- *
- *  - DEMO is the public mock. Anyone can open it to see how OptiStudy looks.
- *  - APP is the real product. It is open to the approved pilot roster only;
- *    everyone else is met by the app's own closed-pilot page.
+ * There is exactly one destination. OptiStudy is open to everyone, and every
+ * account action — creating one, signing in, resetting a password — happens
+ * inside the app at this address, never on iivo.org. Visitors kept looking for
+ * a login form on this site, so every button that mentions signing in must
+ * point here.
  */
-export const OPTISTUDY_DEMO_URL = 'https://opti-study-mock.vercel.app/';
-export const OPTISTUDY_APP_URL = 'https://opti-study-v0-2.vercel.app';
-
-export const WAITLIST_URL = 'join-waitlist.html';
-export const WAITLIST_DETAILS_URL = 'join-waitlist-details.html';
+export const OPTISTUDY_APP_URL = 'https://optistudy.in';
+export const OPTISTUDY_APP_HOST = 'optistudy.in';
 
 /* Spread onto any anchor that leaves iivo.org. */
 export const EXTERNAL_LINK_PROPS = { target: '_blank', rel: 'noreferrer' };

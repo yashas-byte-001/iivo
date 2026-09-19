@@ -1,10 +1,7 @@
 import React from 'react';
-import { About, AccessSteps, CTA, Footer, Hero, Navbar, Product, SECTIONS } from './components';
+import { About, CTA, Footer, GetStarted, Hero, LaunchBar, Navbar, Product, SECTIONS } from './components';
 
-const WaitlistPopup = React.lazy(() => import('./components/WaitlistPopup'));
 const InstallGuide = React.lazy(() => import('./components/InstallGuide'));
-const JoinWaitlistPage = React.lazy(() => import('./components/JoinWaitlistPage'));
-const JoinWaitlistDetailsPage = React.lazy(() => import('./components/JoinWaitlistDetailsPage'));
 
 /*
  * The active section is the last one whose top has passed a line a third of
@@ -47,44 +44,23 @@ function useActiveSection() {
 }
 
 export default function App() {
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isJoinWaitlistPage = pathname.endsWith('join-waitlist.html');
-  const isJoinWaitlistDetailsPage = pathname.endsWith('join-waitlist-details.html');
   const activeSection = useActiveSection();
-
-  if (isJoinWaitlistPage) {
-    return (
-      <React.Suspense fallback={null}>
-        <JoinWaitlistPage />
-      </React.Suspense>
-    );
-  }
-
-  if (isJoinWaitlistDetailsPage) {
-    return (
-      <React.Suspense fallback={null}>
-        <JoinWaitlistDetailsPage />
-      </React.Suspense>
-    );
-  }
 
   return (
     <div className="app-shell">
       <Navbar activeSection={activeSection} />
-      <React.Suspense fallback={null}>
-        <WaitlistPopup />
-      </React.Suspense>
       <main>
         <Hero />
-        <AccessSteps />
-        <About />
+        <GetStarted />
         <Product />
         <React.Suspense fallback={null}>
           <InstallGuide />
         </React.Suspense>
+        <About />
         <CTA />
       </main>
       <Footer />
+      <LaunchBar activeSection={activeSection} />
     </div>
   );
 }

@@ -8,8 +8,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        joinWaitlist: resolve(__dirname, 'join-waitlist.html'),
-        joinWaitlistDetails: resolve(__dirname, 'join-waitlist-details.html'),
         privacy: resolve(__dirname, 'privacy.html'),
         terms: resolve(__dirname, 'terms.html'),
       },
