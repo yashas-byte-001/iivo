@@ -3,15 +3,160 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="IIVO builds OptiStudy, an AI-powered academic workspace that is free and open to everyone at optistudy.in. Plan your study, ask questions about your notes, and install it on any device." />
+    <title>IIVO — Makers of OptiStudy, the AI-powered academic workspace</title>
+    <meta name="description" content="IIVO builds OptiStudy, a free AI-powered academic workspace for students. Plan your study, ask questions about your own notes and track progress. Open to everyone at optistudy.in — no waitlist." />
+    <meta name="keywords" content="IIVO, OptiStudy, Opti Study, AI study planner, academic workspace, study app, AI for students, optistudy.in, iivo.org" />
+    <meta name="author" content="IIVO" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href="https://iivo.org/" />
     <meta name="theme-color" content="#070b16" />
-    <link rel="icon" type="image/png" href="assets/logo.png" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="IIVO" />
+    <meta property="og:url" content="https://iivo.org/" />
+    <meta property="og:title" content="IIVO — Makers of OptiStudy, the AI-powered academic workspace" />
+    <meta property="og:description" content="OptiStudy is free and open to everyone. Plan your study, ask questions about your notes and track progress — on any device, at optistudy.in." />
+    <meta property="og:image" content="https://iivo.org/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="OptiStudy by IIVO — the AI-powered academic workspace, free and open to everyone at optistudy.in" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="IIVO — Makers of OptiStudy" />
+    <meta name="twitter:description" content="OptiStudy, the AI-powered academic workspace, is free and open to everyone at optistudy.in." />
+    <meta name="twitter:image" content="https://iivo.org/og.png" />
+
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <link rel="apple-touch-icon" href="/assets/logo.png" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <title>IIVO — OptiStudy, the AI academic workspace</title>
+
+    <!-- Structured data: who IIVO is, what OptiStudy is, and that they belong together. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://iivo.org/#organization",
+          "name": "IIVO",
+          "url": "https://iivo.org/",
+          "logo": "https://iivo.org/assets/logo.png",
+          "description": "IIVO creates intelligent software that helps people learn better and achieve more. Maker of OptiStudy.",
+          "email": "iivo.contact1@gmail.com",
+          "sameAs": [
+            "https://optistudy.in",
+            "https://www.youtube.com/@IIVO-t5q",
+            "https://www.instagram.com/iivo.tech/"
+          ],
+          "brand": { "@id": "https://iivo.org/#optistudy" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://iivo.org/#website",
+          "url": "https://iivo.org/",
+          "name": "IIVO",
+          "publisher": { "@id": "https://iivo.org/#organization" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://iivo.org/#optistudy",
+          "name": "OptiStudy",
+          "alternateName": ["Opti Study", "OptiStudy by IIVO"],
+          "url": "https://optistudy.in",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web, iOS, Android, Windows, macOS, Linux, ChromeOS",
+          "description": "OptiStudy is an AI-powered academic workspace that plans your study, answers questions about your own notes and keeps track of what you have covered. Free and open to everyone.",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "author": { "@id": "https://iivo.org/#organization" },
+          "publisher": { "@id": "https://iivo.org/#organization" },
+          "featureList": [
+            "AI study planner",
+            "Smart schedule and calendar",
+            "Progress tracking",
+            "AI chat assistant for your own notes",
+            "Notes and summaries",
+            "Installable as a web app on any device"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://iivo.org/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is OptiStudy?",
+              "acceptedAnswer": { "@type": "Answer", "text": "OptiStudy is an AI-powered academic workspace made by IIVO. It plans your study, answers questions about your own notes and keeps track of what you have covered. It is free and open to everyone at optistudy.in." }
+            },
+            {
+              "@type": "Question",
+              "name": "Where do I sign in to OptiStudy?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Signing up, signing in and resetting a password all happen inside the app at https://optistudy.in. There is no login on iivo.org." }
+            },
+            {
+              "@type": "Question",
+              "name": "Is there a waitlist for OptiStudy?",
+              "acceptedAnswer": { "@type": "Answer", "text": "No. OptiStudy is open to everyone. Open optistudy.in in any browser and create your account." }
+            },
+            {
+              "@type": "Question",
+              "name": "Who makes OptiStudy?",
+              "acceptedAnswer": { "@type": "Answer", "text": "OptiStudy is built by IIVO, a company creating intelligent software that helps people learn better and achieve more. IIVO stands for Intelligence, Innovation, Vision, Optimization." }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      Crawlable fallback. React replaces everything inside #root on mount, so
+      visitors never see this; crawlers and previews that do not run JavaScript
+      get the real content and the real link to the product instead of an
+      empty page. Keep it in sync with the copy in src/components.jsx.
+    -->
+    <div id="root">
+      <header>
+        <p><strong>IIVO</strong> — Intelligent software for learning</p>
+      </header>
+      <main>
+        <h1>Your studies, planned and understood by AI.</h1>
+        <p>
+          <a href="https://optistudy.in">OptiStudy</a> is an AI-powered academic workspace that plans your study, answers
+          questions about your own notes and keeps track of what you have actually covered. It is now open to everyone —
+          no waitlist, no invite.
+        </p>
+        <p><a href="https://optistudy.in"><strong>Open OptiStudy at optistudy.in</strong></a> — free to start. Create your account or sign in inside the app.</p>
+
+        <h2>Get started</h2>
+        <ol>
+          <li>Open <a href="https://optistudy.in">optistudy.in</a> in any browser. That is the app.</li>
+          <li>Create your account, or sign in. Everything to do with your account happens inside OptiStudy, not on this website.</li>
+          <li>Install it on your phone, tablet or computer if you like, so it opens like a native app.</li>
+        </ol>
+
+        <h2>OptiStudy</h2>
+        <ul>
+          <li>AI study planner — builds a daily structure from deadlines, workload and free time.</li>
+          <li>Smart schedule and calendar — keeps classes, work and study blocks aligned.</li>
+          <li>Progress tracking — shows what is done, what is next and how much momentum is left.</li>
+          <li>AI chat assistant — answers questions about your own notes.</li>
+          <li>Notes and summaries — turns long sessions into compact study material.</li>
+        </ul>
+
+        <h2>Install OptiStudy on any device</h2>
+        <p>OptiStudy is a progressive web app. It installs straight from your browser on iPhone, iPad, Android, Windows, macOS, Linux and ChromeOS — no app store needed.</p>
+
+        <h2>About IIVO</h2>
+        <p>IIVO creates intelligent software that helps people learn better and achieve more. The name stands for Intelligence, Innovation, Vision, Optimization.</p>
+      </main>
+      <footer>
+        <p>Contact: <a href="mailto:iivo.contact1@gmail.com">iivo.contact1@gmail.com</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></p>
+      </footer>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
