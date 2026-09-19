@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -24,8 +23,6 @@ import {
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL } from './config/links';
 
-const EASE = [0.16, 1, 0.3, 1];
-
 /*
  * The site map. Nav, mobile sheet and footer all read from this so a section
  * can never be reachable from one and missing from another.
@@ -41,13 +38,15 @@ export const SECTIONS = [
 
 const NAV_LINKS = SECTIONS.filter((section) => section.id !== 'home' && section.id !== 'contact');
 
-/* One reveal shape for every section, so the page scrolls as one system. */
-const reveal = (delay = 0) => ({
-  initial: { opacity: 0, y: 14 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.6, delay, ease: EASE },
-});
+/*
+ * No scroll-triggered reveals on this design: the page itself stays still and
+ * the motion budget goes to the background canvas. Content is readable the
+ * instant it is on screen. Reduced-motion is still honoured by the one thing
+ * that does move on the page, the product preview.
+ */
+function useReducedMotion() {
+  return useMediaQuery('(prefers-reduced-motion: reduce)');
+}
 
 function useMediaQuery(query) {
   const getMatches = React.useCallback(() => (typeof window === 'undefined' ? false : window.matchMedia(query).matches), [query]);
@@ -98,11 +97,6 @@ export function OptiButton({ children, className = '', ghost = false, ...props }
       {children}
     </a>
   );
-}
-
-/* Kept for the hero, which renders it behind the launch card. */
-export function BackgroundEffects() {
-  return <div className="background-effects" aria-hidden="true" />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -269,42 +263,33 @@ export function LaunchCard({ variant = 'hero' }) {
 }
 
 export function Hero() {
-  const reduceMotion = useReducedMotion();
-
-  const enter = (delay) => ({
-    initial: reduceMotion ? false : { opacity: 0, y: 18 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.8, delay, ease: EASE },
-  });
-
   return (
     <section id="home" className="hero-shell">
-      <BackgroundEffects />
       <div className="hero-inner">
         <div className="hero-copy">
-          <motion.p className="hero-kicker" {...enter(0)}>
+          <p className="hero-kicker">
             IIVO presents OptiStudy
-          </motion.p>
+          </p>
 
-          <motion.h1 className="hero-title" {...enter(0.08)}>
+          <h1 className="hero-title">
             Your studies, <em>planned and understood</em> by AI.
-          </motion.h1>
+          </h1>
 
-          <motion.p className="hero-body" {...enter(0.16)}>
+          <p className="hero-body">
             OptiStudy is an AI-powered academic workspace that plans your study, answers questions about your own notes and keeps
             track of what you have actually covered. It is now open to everyone &mdash; no waitlist, no invite.
-          </motion.p>
+          </p>
 
-          <motion.p className="hero-foot" {...enter(0.32)}>
+          <p className="hero-foot">
             <span>Free to start</span>
             <span>iPhone, Android, Windows, macOS &amp; Linux</span>
             <span>No app store needed</span>
-          </motion.p>
+          </p>
         </div>
 
-        <motion.div className="hero-launch" {...enter(0.24)}>
+        <div className="hero-launch">
           <LaunchCard />
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -367,7 +352,7 @@ export function GetStarted() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <motion.article key={step.title} className="access-step" {...reveal(index * 0.08)}>
+              <article key={step.title} className="access-step">
                 <div className="access-step-index">
                   <span>0{index + 1}</span>
                   <Icon size={20} />
@@ -382,7 +367,7 @@ export function GetStarted() {
                   {step.link.label}
                   {step.link.external ? <ArrowUpRight size={14} /> : <ArrowRight size={14} />}
                 </a>
-              </motion.article>
+              </article>
             );
           })}
         </div>
@@ -418,7 +403,7 @@ function ProductPreview() {
   }, [reduceMotion, sessions.length]);
 
   return (
-    <motion.div className="app-frame" {...reveal(0.1)} aria-hidden="true">
+    <div className="app-frame" aria-hidden="true">
       <div className="app-frame-bar">
         <span className="app-dot" />
         <span className="app-dot" />
@@ -461,12 +446,7 @@ function ProductPreview() {
             <div className="app-metric">
               <p className="app-eyebrow">Week progress</p>
               <div className="app-bar">
-                <motion.span
-                  initial={reduceMotion ? false : { width: 0 }}
-                  whileInView={{ width: '72%' }}
-                  viewport={{ once: true, amount: 0.6 }}
-                  transition={{ duration: 1.4, ease: EASE, delay: 0.3 }}
-                />
+                <span style={{ width: '72%' }} />
               </div>
               <strong>72%</strong>
             </div>
@@ -477,7 +457,7 @@ function ProductPreview() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -495,7 +475,7 @@ export function Product() {
     <section id="optistudy" className="section-shell section-shell--rule">
       <div className="section-inner">
         <div className="product-grid">
-          <motion.div className="product-copy" {...reveal()}>
+          <div className="product-copy">
             <p className="section-kicker section-kicker--opti">OptiStudy</p>
             <h2 className="section-title">Your academic life, in one place.</h2>
             <p className="section-copy">
@@ -528,7 +508,7 @@ export function Product() {
                 Install on your device
               </SecondaryButton>
             </div>
-          </motion.div>
+          </div>
 
           <ProductPreview />
         </div>
@@ -553,7 +533,7 @@ export function About() {
     <section id="about" className="section-shell section-shell--rule">
       <div className="section-inner">
         <div className="about-grid">
-          <motion.div className="about-copy" {...reveal()}>
+          <div className="about-copy">
             <p className="section-kicker">About IIVO</p>
             <h2 className="section-title">We are IIVO.</h2>
             <p className="section-copy">
@@ -563,17 +543,17 @@ export function About() {
             <p className="section-copy">
               The name is the four things we hold ourselves to: Intelligence, Innovation, Vision, Optimization.
             </p>
-          </motion.div>
+          </div>
 
           <div className="about-list">
             {values.map((value, index) => {
               const Icon = value.icon;
               return (
-                <motion.div key={value.title} className="about-item" {...reveal(index * 0.06)}>
+                <div key={value.title} className="about-item">
                   <Icon size={20} />
                   <h3>{value.title}</h3>
                   <p>{value.description}</p>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -591,7 +571,7 @@ export function CTA() {
   return (
     <section id="launch" className="section-shell section-shell--alt section-shell--rule">
       <div className="section-inner">
-        <motion.div className="cta-banner" {...reveal()}>
+        <div className="cta-banner">
           <div>
             <p className="section-kicker section-kicker--opti">Ready when you are</p>
             <h2 className="section-title">Open OptiStudy and start today.</h2>
@@ -602,7 +582,7 @@ export function CTA() {
           </div>
 
           <LaunchCard variant="banner" />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowUpRight,
   Bell,
@@ -21,7 +20,6 @@ import {
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL } from '../config/links';
 
-const EASE = [0.16, 1, 0.3, 1];
 const APP_HOST = OPTISTUDY_APP_HOST;
 
 /* A small picture of the control the step is talking about. */
@@ -317,7 +315,6 @@ const WHY = [
 ];
 
 export default function InstallGuide() {
-  const reduceMotion = useReducedMotion();
   const [detected, setDetected] = React.useState(null);
   const [active, setActive] = React.useState('windows');
   const tabRefs = React.useRef({});
@@ -348,15 +345,6 @@ export default function InstallGuide() {
     tabRefs.current[id]?.focus();
   };
 
-  const reveal = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 14 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.2 },
-        transition: { duration: 0.6, ease: EASE },
-      };
-
   return (
     <section id="install" className="section-shell section-shell--alt section-shell--rule">
       <div className="section-inner">
@@ -371,7 +359,7 @@ export default function InstallGuide() {
           </p>
         </div>
 
-        <motion.div className="install-why" {...reveal}>
+        <div className="install-why">
           {WHY.map((item) => {
             const Icon = item.icon;
             return (
@@ -382,11 +370,8 @@ export default function InstallGuide() {
               </div>
             );
           })}
-        </motion.div>
+        </div>
 
-        {/* No reveal on the panel: it is tall and interactive, and a block that
-            waits for 20% of itself to scroll into view can stay invisible on a
-            phone. */}
         <div className="install-panel">
           <div className="install-tabs" role="tablist" aria-label="Choose your device" onKeyDown={handleKeyDown}>
             {PLATFORMS.map((platform) => {
