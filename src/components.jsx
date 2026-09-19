@@ -39,10 +39,8 @@ export const SECTIONS = [
 const NAV_LINKS = SECTIONS.filter((section) => section.id !== 'home' && section.id !== 'contact');
 
 /*
- * No scroll-triggered reveals on this design: the page itself stays still and
- * the motion budget goes to the background canvas. Content is readable the
- * instant it is on screen. Reduced-motion is still honoured by the one thing
- * that does move on the page, the product preview.
+ * No scroll-triggered reveals on this design. The only thing that moves on
+ * the page is the product preview, and it still honours reduced motion.
  */
 function useReducedMotion() {
   return useMediaQuery('(prefers-reduced-motion: reduce)');
@@ -87,15 +85,24 @@ export function SecondaryButton({ children, href, className = '', ...props }) {
 }
 
 /*
- * Purple means "opens OptiStudy". Nothing else on the site is purple, and
- * every purple control goes to the same address, so a visitor only ever has
- * to learn one thing.
+ * Purple means "opens OptiStudy". IIVO itself is blue; the product is purple,
+ * and every purple control goes to the same address, so a visitor only ever
+ * has to learn one thing.
  */
 export function OptiButton({ children, className = '', ghost = false, ...props }) {
   return (
     <a href={OPTISTUDY_APP_URL} className={`opti-button ${ghost ? 'opti-button--ghost' : ''} ${className}`} {...EXTERNAL_LINK_PROPS} {...props}>
       {children}
     </a>
+  );
+}
+
+/* The OptiStudy mark: a small purple tile used wherever the product is named. */
+export function OptiMark({ size = 'md' }) {
+  return (
+    <span className={`opti-mark opti-mark--${size}`} aria-hidden="true">
+      O
+    </span>
   );
 }
 
@@ -140,6 +147,7 @@ export function Navbar({ activeSection = 'home' }) {
       <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
         <div className="site-nav-inner">
           <a href="#home" className="brand-markup" onClick={() => setOpen(false)}>
+            <span className="brand-dot" aria-hidden="true" />
             IIVO
           </a>
 
@@ -205,8 +213,11 @@ export function LaunchBar({ activeSection = 'home' }) {
   return (
     <div className={`launch-bar ${visible ? 'is-visible' : ''}`} aria-hidden={!visible}>
       <div className="launch-bar-text">
-        <strong>OptiStudy</strong>
-        <span>{OPTISTUDY_APP_HOST}</span>
+        <OptiMark size="sm" />
+        <div>
+          <strong>OptiStudy</strong>
+          <span>{OPTISTUDY_APP_HOST}</span>
+        </div>
       </div>
       <OptiButton className="button--sm" tabIndex={visible ? 0 : -1}>
         Open
@@ -221,41 +232,56 @@ export function LaunchBar({ activeSection = 'home' }) {
 /* ------------------------------------------------------------------ */
 
 /*
- * The launch card is the whole point of the page. It shows the address,
- * one big button, and says outright that accounts live inside the app,
- * because visitors kept hunting this site for a login form.
+ * The product spotlight. It carries the OptiStudy purple, the address, one
+ * big button, and a plain statement that accounts live inside the app,
+ * because visitors kept looking for a login form on this site.
  */
-export function LaunchCard({ variant = 'hero' }) {
+export function Spotlight({ variant = 'hero' }) {
   return (
-    <div className={`launch-card launch-card--${variant}`}>
-      <div className="launch-card-head">
-        <span className="launch-card-status">
-          <span className="live-dot" aria-hidden="true" />
-          Live &middot; open to everyone
-        </span>
-        <span className="launch-card-host">
-          <Globe size={14} />
-          {OPTISTUDY_APP_HOST}
-        </span>
+    <div className={`spotlight spotlight--${variant}`}>
+      <div className="spotlight-main">
+        <div className="spotlight-brand">
+          <OptiMark size="lg" />
+          <div>
+            <h2 className="spotlight-name">OptiStudy</h2>
+            <p className="spotlight-tag">The AI-powered academic workspace</p>
+          </div>
+          <span className="spotlight-status">
+            <span className="live-dot" aria-hidden="true" />
+            Live &middot; open to everyone
+          </span>
+        </div>
+
+        <div className="spotlight-actions">
+          <OptiButton className="button--xl spotlight-button">
+            Open OptiStudy
+            <ArrowUpRight size={20} />
+          </OptiButton>
+          <a href={OPTISTUDY_APP_URL} className="spotlight-host" {...EXTERNAL_LINK_PROPS}>
+            <Globe size={14} />
+            {OPTISTUDY_APP_HOST}
+          </a>
+        </div>
       </div>
 
-      <OptiButton className="button--xl launch-card-button">
-        Open OptiStudy
-        <ArrowUpRight size={20} />
-      </OptiButton>
-
-      <ul className="launch-card-facts">
+      <ul className="spotlight-facts">
         <li>
-          <UserRoundPlus size={15} />
-          New here? Create your account in the app
+          <UserRoundPlus size={16} />
+          <span>
+            <strong>New here?</strong> Create your account in the app
+          </span>
         </li>
         <li>
-          <KeyRound size={15} />
-          Already have one? Sign in there too
+          <KeyRound size={16} />
+          <span>
+            <strong>Already have one?</strong> Sign in there too
+          </span>
         </li>
         <li>
-          <MonitorDown size={15} />
-          Works in any browser &mdash; <a href="#install">install it</a> for one-tap access
+          <MonitorDown size={16} />
+          <span>
+            <strong>Any browser.</strong> <a href="#install">Install it</a> for one-tap access
+          </span>
         </li>
       </ul>
     </div>
@@ -265,31 +291,26 @@ export function LaunchCard({ variant = 'hero' }) {
 export function Hero() {
   return (
     <section id="home" className="hero-shell">
+      <div className="hero-glow" aria-hidden="true" />
       <div className="hero-inner">
-        <div className="hero-copy">
-          <p className="hero-kicker">
-            IIVO presents OptiStudy
-          </p>
+        <p className="hero-kicker">IIVO &middot; Intelligent software for learning</p>
 
-          <h1 className="hero-title">
-            Your studies, <em>planned and understood</em> by AI.
-          </h1>
+        <h1 className="hero-title">
+          Your studies, <em>planned and understood</em> by AI.
+        </h1>
 
-          <p className="hero-body">
-            OptiStudy is an AI-powered academic workspace that plans your study, answers questions about your own notes and keeps
-            track of what you have actually covered. It is now open to everyone &mdash; no waitlist, no invite.
-          </p>
+        <p className="hero-body">
+          OptiStudy is an AI-powered academic workspace that plans your study, answers questions about your own notes and keeps track
+          of what you have actually covered. It is now open to everyone &mdash; no waitlist, no invite.
+        </p>
 
-          <p className="hero-foot">
-            <span>Free to start</span>
-            <span>iPhone, Android, Windows, macOS &amp; Linux</span>
-            <span>No app store needed</span>
-          </p>
-        </div>
+        <Spotlight />
 
-        <div className="hero-launch">
-          <LaunchCard />
-        </div>
+        <p className="hero-foot">
+          <span>Free to start</span>
+          <span>iPhone, Android, Windows, macOS &amp; Linux</span>
+          <span>No app store needed</span>
+        </p>
       </div>
     </section>
   );
@@ -335,27 +356,25 @@ export function GetStarted() {
   ];
 
   return (
-    <section id="start" className="section-shell section-shell--alt section-shell--rule">
+    <section id="start" className="section-shell section-shell--rule">
       <div className="section-inner">
-        <div className="section-head section-head--split">
-          <div>
-            <p className="section-kicker">Get started</p>
-            <h2 className="section-title">Three steps. The first one is the only one you need.</h2>
-          </div>
+        <div className="section-head section-head--center">
+          <p className="section-kicker">Get started</p>
+          <h2 className="section-title">Three steps. The first one is the only one you need.</h2>
           <p className="section-copy">
             OptiStudy is a web app, so there is nothing to download first. Open it, make an account, and start planning. Installing it
             on your device comes after, whenever you want.
           </p>
         </div>
 
-        <div className="access-steps">
+        <ol className="steps">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <article key={step.title} className="access-step">
-                <div className="access-step-index">
-                  <span>0{index + 1}</span>
-                  <Icon size={20} />
+              <li key={step.title} className="step">
+                <div className="step-marker">
+                  <span className="step-number">{index + 1}</span>
+                  <Icon size={18} />
                 </div>
                 <h3>{step.title}</h3>
                 <p>{step.body}</p>
@@ -367,10 +386,10 @@ export function GetStarted() {
                   {step.link.label}
                   {step.link.external ? <ArrowUpRight size={14} /> : <ArrowRight size={14} />}
                 </a>
-              </article>
+              </li>
             );
           })}
-        </div>
+        </ol>
       </div>
     </section>
   );
@@ -381,7 +400,7 @@ export function GetStarted() {
 /* ------------------------------------------------------------------ */
 
 /*
- * A still life of the product, drawn in the app's own dark purple so a visitor
+ * A still life of the product, drawn in the app's own purple so a visitor
  * sees what OptiStudy looks like before they open it. Deliberately generic —
  * the app itself is where the real UI lives.
  */
@@ -472,31 +491,20 @@ export function Product() {
   ];
 
   return (
-    <section id="optistudy" className="section-shell section-shell--rule">
+    <section id="optistudy" className="section-shell section-shell--opti section-shell--rule">
+      <div className="section-glow" aria-hidden="true" />
       <div className="section-inner">
         <div className="product-grid">
           <div className="product-copy">
-            <p className="section-kicker section-kicker--opti">OptiStudy</p>
+            <p className="section-kicker section-kicker--opti">
+              <OptiMark size="sm" />
+              OptiStudy
+            </p>
             <h2 className="section-title">Your academic life, in one place.</h2>
             <p className="section-copy">
               Plan your study, ask questions about your own notes, and keep track of what you have actually covered &mdash; on every
               device, from one account.
             </p>
-
-            <ul className="product-features">
-              {features.map((feature) => {
-                const Icon = feature.icon;
-                return (
-                  <li key={feature.title}>
-                    <Icon size={18} />
-                    <div>
-                      <strong>{feature.title}</strong>
-                      <span>{feature.body}</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
 
             <div className="product-actions">
               <OptiButton className="button--lg">
@@ -512,6 +520,19 @@ export function Product() {
 
           <ProductPreview />
         </div>
+
+        <ul className="feature-grid">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <li key={feature.title} className="feature-card">
+                <Icon size={20} />
+                <strong>{feature.title}</strong>
+                <span>{feature.body}</span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );
@@ -532,32 +553,29 @@ export function About() {
   return (
     <section id="about" className="section-shell section-shell--rule">
       <div className="section-inner">
-        <div className="about-grid">
-          <div className="about-copy">
-            <p className="section-kicker">About IIVO</p>
-            <h2 className="section-title">We are IIVO.</h2>
-            <p className="section-copy">
-              IIVO creates intelligent software that helps people learn better and achieve more. We are a small team building for
-              students first, starting with the hours they spend planning, studying and keeping track of it all.
-            </p>
-            <p className="section-copy">
-              The name is the four things we hold ourselves to: Intelligence, Innovation, Vision, Optimization.
-            </p>
-          </div>
-
-          <div className="about-list">
-            {values.map((value, index) => {
-              const Icon = value.icon;
-              return (
-                <div key={value.title} className="about-item">
-                  <Icon size={20} />
-                  <h3>{value.title}</h3>
-                  <p>{value.description}</p>
-                </div>
-              );
-            })}
-          </div>
+        <div className="section-head section-head--center">
+          <p className="section-kicker">About IIVO</p>
+          <h2 className="section-title">We are IIVO.</h2>
+          <p className="section-copy">
+            IIVO creates intelligent software that helps people learn better and achieve more. We are a small team building for
+            students first, starting with the hours they spend planning, studying and keeping track of it all.
+          </p>
+          <p className="section-copy">The name is the four things we hold ourselves to.</p>
         </div>
+
+        <ul className="values">
+          {values.map((value) => {
+            const Icon = value.icon;
+            return (
+              <li key={value.title} className="value">
+                <span className="value-letter">{value.title[0]}</span>
+                <Icon size={18} />
+                <h3>{value.title}</h3>
+                <p>{value.description}</p>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );
@@ -569,11 +587,15 @@ export function About() {
 
 export function CTA() {
   return (
-    <section id="launch" className="section-shell section-shell--alt section-shell--rule">
+    <section id="launch" className="section-shell section-shell--rule">
       <div className="section-inner">
         <div className="cta-banner">
-          <div>
-            <p className="section-kicker section-kicker--opti">Ready when you are</p>
+          <div className="section-glow section-glow--tight" aria-hidden="true" />
+          <div className="cta-copy">
+            <p className="section-kicker section-kicker--opti">
+              <OptiMark size="sm" />
+              Ready when you are
+            </p>
             <h2 className="section-title">Open OptiStudy and start today.</h2>
             <p className="section-copy">
               It is free to start and open to everyone. Create your account inside the app, and it will be waiting for you on every
@@ -581,7 +603,7 @@ export function CTA() {
             </p>
           </div>
 
-          <LaunchCard variant="banner" />
+          <Spotlight variant="banner" />
         </div>
       </div>
     </section>
@@ -598,7 +620,10 @@ export function Footer() {
       <div className="section-inner">
         <div className="footer-layout">
           <div className="footer-brand">
-            <div className="footer-wordmark">IIVO</div>
+            <div className="footer-wordmark">
+              <span className="brand-dot" aria-hidden="true" />
+              IIVO
+            </div>
             <p>Intelligence. Innovation. Vision. Optimization. Intelligent software that helps people learn better and achieve more.</p>
             <a href="mailto:iivo.contact1@gmail.com" className="text-link">
               <Mail size={14} />

@@ -1,8 +1,6 @@
 import React from 'react';
 import { About, CTA, Footer, GetStarted, Hero, LaunchBar, Navbar, Product, SECTIONS } from './components';
 
-import Background from './components/Background';
-
 const InstallGuide = React.lazy(() => import('./components/InstallGuide'));
 
 /*
@@ -50,7 +48,6 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Background />
       <Navbar activeSection={activeSection} />
       <main>
         <Hero />
