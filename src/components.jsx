@@ -8,6 +8,7 @@ import {
   CircleCheckBig,
   ClipboardList,
   Eye,
+  FlaskConical,
   Globe,
   GraduationCap,
   KeyRound,
@@ -18,10 +19,11 @@ import {
   Sparkles,
   Stars,
   UserRoundPlus,
+  Users,
   X,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL } from './config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
 
 /*
  * The site map. Nav, mobile sheet and footer all read from this so a section
@@ -33,6 +35,7 @@ export const SECTIONS = [
   { id: 'optistudy', label: 'OptiStudy', hint: 'The product' },
   { id: 'install', label: 'Get the app', hint: 'Install on any device' },
   { id: 'about', label: 'About', hint: 'Who we are' },
+  { id: 'testers', label: 'Testers', hint: 'Join the programme' },
   { id: 'contact', label: 'Contact', hint: 'Reach us' },
 ];
 
@@ -197,6 +200,10 @@ export function Navbar({ activeSection = 'home' }) {
           <p className="nav-sheet-note">
             Free for everyone. Sign in or create your account inside the app at <strong>{OPTISTUDY_APP_HOST}</strong>.
           </p>
+          <a href={TESTER_URL} className="secondary-button">
+            <FlaskConical size={15} />
+            Join the tester programme
+          </a>
         </div>
       </div>
     </>
@@ -582,6 +589,63 @@ export function About() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Tester programme                                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The one thing on iivo.org that asks for anything from a visitor. It is
+ * blue, not purple: it is an IIVO programme, not the product, and the copy
+ * says so, because a form on this site has been mistaken for the app's
+ * login before.
+ */
+export function Testers() {
+  const perks = [
+    { icon: Sparkles, title: 'Early access', body: 'Try new features weeks before everyone else.' },
+    { icon: MessageCircleMore, title: 'Direct line', body: 'Your feedback goes straight to the team.' },
+    { icon: Users, title: 'Shape the product', body: 'Testers decide what gets fixed and built next.' },
+  ];
+
+  return (
+    <section id="testers" className="section-shell section-shell--rule">
+      <div className="section-inner">
+        <div className="testers-banner">
+          <div className="testers-copy">
+            <p className="section-kicker">
+              <FlaskConical size={13} />
+              Tester programme
+            </p>
+            <h2 className="section-title">Help shape OptiStudy.</h2>
+            <p className="section-copy">
+              We are a small team, and the people who use OptiStudy every day see things we miss. Join the tester programme to try
+              new features first and tell us what to change.
+            </p>
+            <div className="testers-actions">
+              <PrimaryButton href={TESTER_URL} className="button--lg">
+                Join the tester programme
+              </PrimaryButton>
+              <span className="testers-note">Takes a minute. Sign in with Google or email.</span>
+            </div>
+          </div>
+
+          <ul className="testers-perks">
+            {perks.map((perk) => {
+              const Icon = perk.icon;
+              return (
+                <li key={perk.title}>
+                  <Icon size={18} />
+                  <strong>{perk.title}</strong>
+                  <span>{perk.body}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Final call to action                                                */
 /* ------------------------------------------------------------------ */
 
@@ -646,6 +710,7 @@ export function Footer() {
             <div>
               <h3>Company</h3>
               <a href="#about">About IIVO</a>
+              <a href={TESTER_URL}>Tester programme</a>
               <a href="#start">Get started</a>
               <a href="mailto:iivo.contact1@gmail.com">Contact</a>
             </div>

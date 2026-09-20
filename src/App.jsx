@@ -1,7 +1,8 @@
 import React from 'react';
-import { About, CTA, Footer, GetStarted, Hero, LaunchBar, Navbar, Product, SECTIONS } from './components';
+import { About, CTA, Footer, GetStarted, Hero, LaunchBar, Navbar, Product, SECTIONS, Testers } from './components';
 
 const InstallGuide = React.lazy(() => import('./components/InstallGuide'));
+const TesterPage = React.lazy(() => import('./components/TesterPage'));
 
 /*
  * The active section is the last one whose top has passed a line a third of
@@ -44,7 +45,17 @@ function useActiveSection() {
 }
 
 export default function App() {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isTesterPage = pathname.endsWith('tester.html') || pathname.endsWith('/tester');
   const activeSection = useActiveSection();
+
+  if (isTesterPage) {
+    return (
+      <React.Suspense fallback={null}>
+        <TesterPage />
+      </React.Suspense>
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -57,6 +68,7 @@ export default function App() {
           <InstallGuide />
         </React.Suspense>
         <About />
+        <Testers />
         <CTA />
       </main>
       <Footer />
