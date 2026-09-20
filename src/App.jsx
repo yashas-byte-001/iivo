@@ -1,5 +1,6 @@
 import React from 'react';
 import { About, Footer, Hero, LaunchBar, Navbar, Product, SECTIONS, Testers } from './components';
+import Loader, { shouldShowLoader } from './components/Loader';
 
 const InstallGuide = React.lazy(() => import('./components/InstallGuide'));
 const TesterPage = React.lazy(() => import('./components/TesterPage'));
@@ -49,6 +50,16 @@ export default function App() {
   const isTesterPage = pathname.endsWith('tester.html') || pathname.endsWith('/tester');
   const activeSection = useActiveSection();
 
+  /* The opening plays once per full load of the home page. While it runs the
+     page sits underneath, scaled down a touch, and eases up as it dissolves. */
+  const [opening, setOpening] = React.useState(() => !isTesterPage && shouldShowLoader());
+  const finishOpening = React.useCallback(() => setOpening(false), []);
+
+  React.useEffect(() => {
+    document.documentElement.classList.toggle('is-opening', opening);
+    return () => document.documentElement.classList.remove('is-opening');
+  }, [opening]);
+
   if (isTesterPage) {
     return (
       <React.Suspense fallback={null}>
@@ -58,21 +69,24 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
-      <Navbar activeSection={activeSection} />
-      <main>
-        <Hero />
-        {/* The OptiStudy block: the product, its features, how to install it,
-            and the tester programme around it. About IIVO comes after. */}
-        <Product />
-        <React.Suspense fallback={null}>
-          <InstallGuide />
-        </React.Suspense>
-        <Testers />
-        <About />
-      </main>
-      <Footer />
-      <LaunchBar activeSection={activeSection} />
-    </div>
+    <>
+      {opening ? <Loader onDone={finishOpening} /> : null}
+        <div className={`app-shell ${opening ? 'is-under' : ''}`}>
+        <Navbar activeSection={activeSection} />
+        <main>
+          <Hero />
+          {/* The OptiStudy block: the product, its features, how to install it,
+              and the tester programme around it. About IIVO comes after. */}
+          <Product />
+          <React.Suspense fallback={null}>
+            <InstallGuide />
+          </React.Suspense>
+          <Testers />
+          <About />
+        </main>
+        <Footer />
+        <LaunchBar activeSection={activeSection} />
+        </div>
+    </>
   );
 }
