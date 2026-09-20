@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
+import playgroundShot from '../assets/playground.png';
 
 /*
  * The site map. Nav, mobile sheet and footer all read from this so a section
@@ -31,7 +32,6 @@ import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL 
  */
 export const SECTIONS = [
   { id: 'home', label: 'Home', hint: 'Start here' },
-  { id: 'start', label: 'Get started', hint: 'Open, sign in, install' },
   { id: 'optistudy', label: 'OptiStudy', hint: 'The product' },
   { id: 'install', label: 'Get the app', hint: 'Install on any device' },
   { id: 'testers', label: 'Testers', hint: 'Join the programme' },
@@ -41,14 +41,7 @@ export const SECTIONS = [
 
 const NAV_LINKS = SECTIONS.filter((section) => section.id !== 'home' && section.id !== 'contact');
 
-/*
- * No scroll-triggered reveals on this design. The only thing that moves on
- * the page is the product preview, and it still honours reduced motion.
- */
-function useReducedMotion() {
-  return useMediaQuery('(prefers-reduced-motion: reduce)');
-}
-
+/* No scroll-triggered reveals on this design; nothing on the page moves. */
 function useMediaQuery(query) {
   const getMatches = React.useCallback(() => (typeof window === 'undefined' ? false : window.matchMedia(query).matches), [query]);
   const [matches, setMatches] = React.useState(getMatches);
@@ -324,166 +317,15 @@ export function Hero() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Get started                                                         */
-/* ------------------------------------------------------------------ */
-
-export function GetStarted() {
-  const steps = [
-    {
-      icon: Globe,
-      title: 'Open OptiStudy',
-      body: (
-        <>
-          Go to <strong>{OPTISTUDY_APP_HOST}</strong> in any browser, or press the purple button anywhere on this page. That is the app.
-        </>
-      ),
-      link: { label: 'Open it now', href: OPTISTUDY_APP_URL, external: true },
-    },
-    {
-      icon: UserRoundPlus,
-      title: 'Create your account, or sign in',
-      body: (
-        <>
-          Everything to do with your account happens inside OptiStudy: signing up, signing in and resetting a password. There is
-          nothing to log into on this website.
-        </>
-      ),
-      link: { label: 'Go to sign-in', href: OPTISTUDY_APP_URL, external: true },
-    },
-    {
-      icon: MonitorDown,
-      title: 'Install it, if you like',
-      body: (
-        <>
-          Add OptiStudy to your home screen, dock or taskbar in a few taps so it opens like a native app. Optional, but worth it.
-        </>
-      ),
-      link: { label: 'Installation guide', href: '#install' },
-    },
-  ];
-
-  return (
-    <section id="start" className="section-shell section-shell--rule">
-      <div className="section-inner">
-        <div className="section-head section-head--center">
-          <p className="section-kicker">Get started</p>
-          <h2 className="section-title">Three steps. The first one is the only one you need.</h2>
-          <p className="section-copy">
-            OptiStudy is a web app, so there is nothing to download first. Open it, make an account, and start planning. Installing it
-            on your device comes after, whenever you want.
-          </p>
-        </div>
-
-        <ol className="steps">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <li key={step.title} className="step">
-                <div className="step-marker">
-                  <span className="step-number">{index + 1}</span>
-                  <Icon size={18} />
-                </div>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-                <a
-                  href={step.link.href}
-                  className={`text-link ${step.link.external ? 'text-link--opti' : ''}`}
-                  {...(step.link.external ? EXTERNAL_LINK_PROPS : {})}
-                >
-                  {step.link.label}
-                  {step.link.external ? <ArrowUpRight size={14} /> : <ArrowRight size={14} />}
-                </a>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* OptiStudy                                                           */
 /* ------------------------------------------------------------------ */
 
-/*
- * A still life of the product, drawn in the app's own purple so a visitor
- * sees what OptiStudy looks like before they open it. Deliberately generic —
- * the app itself is where the real UI lives.
- */
+/* A real screenshot of the app, framed. */
 function ProductPreview() {
-  const reduceMotion = useReducedMotion();
-
-  const sessions = [
-    { subject: 'Physics', title: 'Wave interference recap', time: '09:30', tone: 'lavender' },
-    { subject: 'Math', title: 'Integration by parts drill', time: '11:00', tone: 'rose' },
-    { subject: 'Chemistry', title: 'Organic reactions recall', time: '15:45', tone: 'amber' },
-  ];
-
-  const [activeSession, setActiveSession] = React.useState(0);
-
-  React.useEffect(() => {
-    if (reduceMotion) return undefined;
-    const timer = window.setInterval(() => setActiveSession((current) => (current + 1) % sessions.length), 2600);
-    return () => window.clearInterval(timer);
-  }, [reduceMotion, sessions.length]);
-
   return (
-    <div className="app-frame" aria-hidden="true">
-      <div className="app-frame-bar">
-        <span className="app-dot" />
-        <span className="app-dot" />
-        <span className="app-dot" />
-        <p>{OPTISTUDY_APP_HOST}</p>
-      </div>
-
-      <div className="app-frame-body">
-        <aside className="app-rail">
-          {[0, 1, 2, 3, 4].map((item) => (
-            <span key={item} className={`app-rail-item ${item === 0 ? 'is-active' : ''}`} />
-          ))}
-        </aside>
-
-        <div className="app-canvas">
-          <div className="app-canvas-head">
-            <div>
-              <p className="app-eyebrow">Today</p>
-              <h4>Your plan is ready</h4>
-            </div>
-            <span className="app-chip">
-              <span className="live-dot" />3 sessions
-            </span>
-          </div>
-
-          <ul className="app-sessions">
-            {sessions.map((session, index) => (
-              <li key={session.title} className={index === activeSession ? 'is-active' : ''}>
-                <span className={`app-tone app-tone--${session.tone}`} />
-                <div>
-                  <strong>{session.title}</strong>
-                  <span>{session.subject}</span>
-                </div>
-                <em>{session.time}</em>
-              </li>
-            ))}
-          </ul>
-
-          <div className="app-metrics">
-            <div className="app-metric">
-              <p className="app-eyebrow">Week progress</p>
-              <div className="app-bar">
-                <span style={{ width: '72%' }} />
-              </div>
-              <strong>72%</strong>
-            </div>
-            <div className="app-metric">
-              <p className="app-eyebrow">Focus streak</p>
-              <strong>12 days</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <figure className="app-shot">
+      <img src={playgroundShot} alt="The OptiStudy playground: today's session, the next exam, and Library, Planner and Stats." loading="lazy" width="1567" height="829" />
+    </figure>
   );
 }
 
@@ -646,35 +488,6 @@ export function Testers() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Final call to action                                                */
-/* ------------------------------------------------------------------ */
-
-export function CTA() {
-  return (
-    <section id="launch" className="section-shell section-shell--rule">
-      <div className="section-inner">
-        <div className="cta-banner">
-          <div className="section-glow section-glow--tight" aria-hidden="true" />
-          <div className="cta-copy">
-            <p className="section-kicker section-kicker--opti">
-              <OptiMark size="sm" />
-              Ready when you are
-            </p>
-            <h2 className="section-title">Open OptiStudy and start today.</h2>
-            <p className="section-copy">
-              It is free to start and open to everyone. Create your account inside the app, and it will be waiting for you on every
-              device you sign in from.
-            </p>
-          </div>
-
-          <Spotlight variant="banner" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Footer                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -711,7 +524,6 @@ export function Footer() {
               <h3>Company</h3>
               <a href="#about">About IIVO</a>
               <a href={TESTER_URL}>Tester programme</a>
-              <a href="#start">Get started</a>
               <a href="mailto:iivo.contact1@gmail.com">Contact</a>
             </div>
             <div>

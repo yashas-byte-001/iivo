@@ -817,10 +817,19 @@ img { max-width: 100%; display: block; }
 .feature-card strong { font-weight: 600; color: var(--ink); }
 .feature-card span { font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); }
 
-/*
- * The product preview, in the app's own purple with a glow behind it.
- * Deliberately generic — the app itself is where the real UI lives.
- */
+/* A real screenshot of the app, in a purple-edged frame with a glow behind it. */
+.app-shot {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--opti-line);
+  background: #0c0a18;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 90px rgba(139, 92, 246, 0.25), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  overflow: hidden;
+}
+
+.app-shot img { width: 100%; height: auto; display: block; }
+
 .app-frame {
   position: relative;
   border-radius: var(--radius-lg);

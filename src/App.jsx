@@ -1,5 +1,5 @@
 import React from 'react';
-import { About, CTA, Footer, GetStarted, Hero, LaunchBar, Navbar, Product, SECTIONS, Testers } from './components';
+import { About, Footer, Hero, LaunchBar, Navbar, Product, SECTIONS, Testers } from './components';
 
 const InstallGuide = React.lazy(() => import('./components/InstallGuide'));
 const TesterPage = React.lazy(() => import('./components/TesterPage'));
@@ -62,7 +62,6 @@ export default function App() {
       <Navbar activeSection={activeSection} />
       <main>
         <Hero />
-        <GetStarted />
         {/* The OptiStudy block: the product, its features, how to install it,
             and the tester programme around it. About IIVO comes after. */}
         <Product />
@@ -71,7 +70,6 @@ export default function App() {
         </React.Suspense>
         <Testers />
         <About />
-        <CTA />
       </main>
       <Footer />
       <LaunchBar activeSection={activeSection} />
