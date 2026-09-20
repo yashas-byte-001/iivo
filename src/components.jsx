@@ -34,8 +34,8 @@ export const SECTIONS = [
   { id: 'start', label: 'Get started', hint: 'Open, sign in, install' },
   { id: 'optistudy', label: 'OptiStudy', hint: 'The product' },
   { id: 'install', label: 'Get the app', hint: 'Install on any device' },
-  { id: 'about', label: 'About', hint: 'Who we are' },
   { id: 'testers', label: 'Testers', hint: 'Join the programme' },
+  { id: 'about', label: 'About', hint: 'Who we are' },
   { id: 'contact', label: 'Contact', hint: 'Reach us' },
 ];
 
@@ -606,7 +606,7 @@ export function Testers() {
   ];
 
   return (
-    <section id="testers" className="section-shell section-shell--rule">
+    <section id="testers" className="section-shell section-shell--flow">
       <div className="section-inner">
         <div className="testers-banner">
           <div className="testers-copy">

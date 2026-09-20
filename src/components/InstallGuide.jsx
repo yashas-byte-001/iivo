@@ -346,7 +346,7 @@ export default function InstallGuide() {
   };
 
   return (
-    <section id="install" className="section-shell section-shell--alt section-shell--rule">
+    <section id="install" className="section-shell section-shell--flow">
       <div className="section-inner">
         <div className="section-head section-head--split">
           <div>

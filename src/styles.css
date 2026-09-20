@@ -153,6 +153,9 @@ img { max-width: 100%; display: block; }
 
 .section-shell--opti { overflow: hidden; }
 
+/* A section that continues the one above it: no rule, tighter top. */
+.section-shell--flow { padding-top: 0; }
+
 .section-inner {
   position: relative;
   z-index: 1;

@@ -63,12 +63,14 @@ export default function App() {
       <main>
         <Hero />
         <GetStarted />
+        {/* The OptiStudy block: the product, its features, how to install it,
+            and the tester programme around it. About IIVO comes after. */}
         <Product />
         <React.Suspense fallback={null}>
           <InstallGuide />
         </React.Suspense>
-        <About />
         <Testers />
+        <About />
         <CTA />
       </main>
       <Footer />
