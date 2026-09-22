@@ -40,7 +40,8 @@ function AuthPanel({ auth, busy }) {
     event.preventDefault();
     if (mode === 'signup') {
       const created = await auth.signUpWithPassword(values);
-      if (!created) return;
+      /* 'confirm' means the account exists but is waiting on the email link. */
+      if (created !== true) return;
     }
     await auth.signInWithPassword(values);
   };

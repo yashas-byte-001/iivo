@@ -88,7 +88,7 @@ export function useAuth() {
       return false;
     }
     setError('');
-    const { error: authError } = await supabase.auth.signUp({
+    const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name.trim() } },
@@ -96,6 +96,13 @@ export function useAuth() {
     if (authError) {
       setError(mapAuthError(authError));
       return false;
+    }
+    /* When the project asks for email confirmation, sign-up returns a user but
+       no session. Signing in straight away would fail with "Email not
+       confirmed", so say what is actually waiting for them. */
+    if (!data?.session) {
+      setError('Check your email to confirm your account, then sign in.');
+      return 'confirm';
     }
     return true;
   }, []);
