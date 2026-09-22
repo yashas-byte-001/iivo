@@ -11,6 +11,23 @@
     <link rel="canonical" href="https://iivo.org/" />
     <meta name="theme-color" content="#070b16" />
 
+    <!--
+      The body carries a crawlable copy of the page (see #prerender below) for
+      agents that do not run JavaScript. A browser must never paint it: for the
+      moment between parsing the HTML and React mounting it showed as a wall of
+      unstyled text, which is what visitors saw before the opening animation.
+
+      This script runs while the head is being parsed — before the body exists —
+      so `html.js` is set ahead of the first paint and the rule below keeps the
+      fallback out of the render entirely. An agent that does not run scripts
+      never sets the class, so it still gets the content.
+    -->
+    <style>
+      html { background: #070b16; }
+      html.js #prerender { display: none; }
+    </style>
+    <script>document.documentElement.className += ' js';</script>
+
     <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="IIVO" />
@@ -119,6 +136,7 @@
       empty page. Keep it in sync with the copy in src/components.jsx.
     -->
     <div id="root">
+      <div id="prerender">
       <header>
         <p><strong>IIVO</strong> — Intelligent software for learning</p>
       </header>
@@ -152,6 +170,7 @@
       <footer>
         <p>Contact: <a href="mailto:iivo.contact1@gmail.com">iivo.contact1@gmail.com</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></p>
       </footer>
+      </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
