@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
+import { OPEN_INSTALL_EVENT } from '../components';
 
 const APP_HOST = OPTISTUDY_APP_HOST;
 
@@ -318,7 +319,14 @@ export default function InstallGuide() {
   const tabRefs = React.useRef({});
 
   React.useEffect(() => {
-    setDetected(detectPlatform());
+    const platform = detectPlatform();
+    setDetected(platform);
+    // The hero's "Install on this device" (and a direct #install link) open
+    // the visitor's own steps; a plain scroll past the section does not.
+    const open = () => setActive(platform ?? PLATFORMS[0].id);
+    if (window.location.hash === '#install') open();
+    window.addEventListener(OPEN_INSTALL_EVENT, open);
+    return () => window.removeEventListener(OPEN_INSTALL_EVENT, open);
   }, []);
 
   const current = active ? PLATFORMS.find((platform) => platform.id === active) : null;

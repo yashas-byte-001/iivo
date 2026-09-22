@@ -256,6 +256,13 @@ export function LaunchBar({ activeSection = 'home' }) {
  * button. The earlier card carried all of that at once, and it read as a
  * page of instructions.
  */
+/* Tells the install guide (further down, lazy-loaded) to open the steps
+   for the visitor's device; the anchor itself does the scrolling. */
+export const OPEN_INSTALL_EVENT = 'iivo:open-install';
+function openInstallGuide() {
+  window.dispatchEvent(new CustomEvent(OPEN_INSTALL_EVENT));
+}
+
 export function Spotlight() {
   const android = useIsAndroid();
   return (
@@ -278,7 +285,13 @@ export function Spotlight() {
             <Download size={20} />
             Download OptiStudy for Android
           </a>
-        ) : null}
+        ) : (
+          /* Everyone else: down to the guide, which opens on their device. */
+          <a href="#install" className="opti-button opti-button--ghost button--xl spotlight-button" onClick={openInstallGuide}>
+            <MonitorDown size={20} />
+            Install on this device
+          </a>
+        )}
       </div>
     </div>
   );
