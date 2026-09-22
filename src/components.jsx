@@ -9,6 +9,7 @@ import {
   ClipboardList,
   Eye,
   FlaskConical,
+  Download,
   Globe,
   GraduationCap,
   KeyRound,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
+import { useIsAndroid } from './hooks/usePlatform';
 import playgroundShot from '../assets/playground.png';
 
 /*
@@ -110,6 +112,7 @@ export function Navbar({ activeSection = 'home' }) {
   const isCompact = useMediaQuery('(max-width: 1024px)');
   const [scrolled, setScrolled] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const android = useIsAndroid();
 
   React.useEffect(() => {
     const update = () => setScrolled(window.scrollY > 8);
@@ -186,7 +189,13 @@ export function Navbar({ activeSection = 'home' }) {
           ))}
         </nav>
         <div className="nav-sheet-actions">
-          <OptiButton className="button--lg">
+          {android ? (
+            <a href={OPTISTUDY_APK_URL} className="opti-button button--lg" download>
+              <Download size={16} />
+              Download for Android
+            </a>
+          ) : null}
+          <OptiButton className="button--lg" ghost={android}>
             Open OptiStudy
             <ArrowUpRight size={16} />
           </OptiButton>
@@ -210,6 +219,7 @@ export function Navbar({ activeSection = 'home' }) {
  */
 export function LaunchBar({ activeSection = 'home' }) {
   const visible = activeSection !== 'home';
+  const android = useIsAndroid();
   return (
     <div className={`launch-bar ${visible ? 'is-visible' : ''}`} aria-hidden={!visible}>
       <div className="launch-bar-text">
@@ -219,10 +229,17 @@ export function LaunchBar({ activeSection = 'home' }) {
           <span>{OPTISTUDY_APP_HOST}</span>
         </div>
       </div>
-      <OptiButton className="button--sm" tabIndex={visible ? 0 : -1}>
-        Open
-        <ArrowUpRight size={15} />
-      </OptiButton>
+      {android ? (
+        <a href={OPTISTUDY_APK_URL} className="opti-button button--sm" download tabIndex={visible ? 0 : -1}>
+          <Download size={15} />
+          Download
+        </a>
+      ) : (
+        <OptiButton className="button--sm" tabIndex={visible ? 0 : -1}>
+          Open
+          <ArrowUpRight size={15} />
+        </OptiButton>
+      )}
     </div>
   );
 }
@@ -237,6 +254,7 @@ export function LaunchBar({ activeSection = 'home' }) {
  * because visitors kept looking for a login form on this site.
  */
 export function Spotlight({ variant = 'hero' }) {
+  const android = useIsAndroid();
   return (
     <div className={`spotlight spotlight--${variant}`}>
       <div className="spotlight-main">
@@ -252,15 +270,39 @@ export function Spotlight({ variant = 'hero' }) {
           </span>
         </div>
 
+        {/* One primary action per visitor. An Android phone gets the app
+            file, because "download the app" is what that visitor is looking
+            for; everyone else opens the site, with the install guide for
+            their device one tap away. Both routes lead to the same account. */}
         <div className="spotlight-actions">
-          <OptiButton className="button--xl spotlight-button">
-            Open OptiStudy
-            <ArrowUpRight size={20} />
-          </OptiButton>
-          <a href={OPTISTUDY_APP_URL} className="spotlight-host" {...EXTERNAL_LINK_PROPS}>
-            <Globe size={14} />
-            {OPTISTUDY_APP_HOST}
-          </a>
+          {android ? (
+            <>
+              <a href={OPTISTUDY_APK_URL} className="opti-button button--xl spotlight-button" download>
+                <Download size={20} />
+                Download for Android
+              </a>
+              <span className="spotlight-detail">Free &middot; 1.4 MB &middot; installs in a minute</span>
+              <OptiButton ghost className="button--sm spotlight-alt">
+                Or open in your browser
+                <ArrowUpRight size={15} />
+              </OptiButton>
+            </>
+          ) : (
+            <>
+              <OptiButton className="button--xl spotlight-button">
+                Open OptiStudy
+                <ArrowUpRight size={20} />
+              </OptiButton>
+              <a href={OPTISTUDY_APP_URL} className="spotlight-host" {...EXTERNAL_LINK_PROPS}>
+                <Globe size={14} />
+                {OPTISTUDY_APP_HOST}
+              </a>
+              <a href="#install" className="opti-button opti-button--ghost button--sm spotlight-alt">
+                <MonitorDown size={15} />
+                Install it on this device
+              </a>
+            </>
+          )}
         </div>
       </div>
 
@@ -278,9 +320,17 @@ export function Spotlight({ variant = 'hero' }) {
           </span>
         </li>
         <li>
-          <MonitorDown size={16} />
+          {android ? <Globe size={16} /> : <MonitorDown size={16} />}
           <span>
-            <strong>Any browser.</strong> <a href="#install">Install it</a> for one-tap access
+            {android ? (
+              <>
+                <strong>No download needed.</strong> The app and <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>{OPTISTUDY_APP_HOST}</a> are the same thing
+              </>
+            ) : (
+              <>
+                <strong>Any device.</strong> <a href="#install">Install it</a> for one-tap access
+              </>
+            )}
           </span>
         </li>
       </ul>

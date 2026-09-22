@@ -470,7 +470,7 @@ export default function InstallGuide() {
                 </p>
                 <span className="install-url">{APP_HOST}</span>
                 <a href={OPTISTUDY_APP_URL} className="opti-button" {...EXTERNAL_LINK_PROPS}>
-                  Open OptiStudy to install
+                  {current.action ? 'Open OptiStudy in the browser' : 'Open OptiStudy to install'}
                   <ArrowUpRight size={16} />
                 </a>
               </div>

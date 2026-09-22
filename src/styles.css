@@ -681,6 +681,8 @@ html.is-opening { overflow: hidden; }
 }
 
 .spotlight-button { min-width: 16rem; }
+.spotlight-detail { font-size: 0.85rem; color: var(--ink-3); }
+.spotlight-alt { margin-top: 0.35rem; text-decoration: none; }
 
 .spotlight-host {
   display: inline-flex;
@@ -1739,8 +1741,14 @@ kbd.ui-label {
   :root { --nav-height: 3.9rem; }
 
   .section-shell { padding-inline: 1rem; }
-  .hero-shell { padding-inline: 1rem; }
+  /* On a phone the card is the point of the page: the paragraph moves under
+     it (grid order), the top padding shrinks, and the primary button sits in
+     the first screen with room to spare. */
+  .hero-shell { padding: 2.25rem 1rem 3rem; }
   .hero-title { font-size: clamp(2.2rem, 10vw, 3rem); }
+  .hero-body { order: 3; margin-top: 1.5rem; font-size: 0.98rem; }
+  .hero-foot { order: 4; }
+  .hero-inner > .spotlight { margin-top: 1.5rem; }
 
   .nav-launch { padding-inline: 0.85rem; }
   .nav-launch svg { display: none; }
