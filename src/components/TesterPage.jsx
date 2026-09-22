@@ -1,18 +1,17 @@
 import React from 'react';
-import { ArrowLeft, ArrowUpRight, FlaskConical, MessageSquareText, Sparkles, Users } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, FlaskConical } from 'lucide-react';
 import TesterForm from './TesterForm';
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_URL } from '../config/links';
 
-const PERKS = [
-  { icon: Sparkles, title: 'Early access to new features', body: 'Try what we are building weeks before it reaches everyone else.' },
-  { icon: MessageSquareText, title: 'A direct line to the team', body: 'Your feedback goes straight to the people building OptiStudy.' },
-  { icon: Users, title: 'Shape the product', body: 'Testers decide what gets fixed first and what gets built next.' },
-];
-
 /*
- * The tester programme page. Two columns: why join, and the form. The only
- * sign-in on iivo.org lives here, and the copy says so, because visitors
- * have confused this site's forms with the product's login before.
+ * The tester programme page: the form, and nothing in front of it. The pitch
+ * and the perks live on the home page, which is where the visitor came from.
+ * The two-column version put them here too, and on a phone that pushed the
+ * sign-in a full screen down: people tapped "Join", saw a page of copy, and
+ * left believing they had joined. Now the first thing on screen is the step
+ * they have to take, before and after signing in. The only sign-in on
+ * iivo.org lives here, and the note says so, because visitors have confused
+ * this site's forms with the product's login before.
  */
 export default function TesterPage() {
   return (
@@ -25,9 +24,9 @@ export default function TesterPage() {
           IIVO
         </a>
         <div className="tester-topbar-actions">
-          <a href="/" className="secondary-button button--sm">
+          <a href="/" className="secondary-button button--sm" aria-label="Back to home">
             <ArrowLeft size={15} />
-            Back to home
+            <span>Back to home</span>
           </a>
           <a href={OPTISTUDY_APP_URL} className="opti-button button--sm" {...EXTERNAL_LINK_PROPS}>
             Open OptiStudy
@@ -42,33 +41,19 @@ export default function TesterPage() {
             <FlaskConical size={13} />
             Tester programme
           </p>
-          <h1 className="section-title">Help shape OptiStudy.</h1>
-          <p className="section-copy">
-            We are a small team, and the people who use OptiStudy every day see things we miss. Join the tester programme and
-            you will hear about new features first, try them early, and tell us what to change.
-          </p>
-
-          <ul className="tester-perks">
-            {PERKS.map((perk) => {
-              const Icon = perk.icon;
-              return (
-                <li key={perk.title}>
-                  <Icon size={18} />
-                  <div>
-                    <strong>{perk.title}</strong>
-                    <span>{perk.body}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-
-          <p className="tester-aside">
-            This sign-in is for the tester programme only. To use OptiStudy itself, open the app and sign in there.
-          </p>
+          <h1 className="section-title">Join the tester programme</h1>
+          <p className="section-copy">Sign in, tell us a little about yourself, and you are in. About a minute.</p>
         </div>
 
         <TesterForm />
+
+        <p className="tester-aside">
+          This sign-in is for the tester programme only. To use OptiStudy itself,{' '}
+          <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>
+            open the app
+          </a>{' '}
+          and sign in there.
+        </p>
       </main>
     </div>
   );

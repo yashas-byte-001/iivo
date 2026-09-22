@@ -1372,35 +1372,25 @@ kbd.ui-label {
 
 .tester-topbar-actions { display: flex; align-items: center; gap: 0.6rem; }
 
+/* One column, the form right under a two-line heading: on a phone the
+   sign-in must be on the first screen, and after signing in the "About you"
+   step lands in the same place. */
 .tester-shell {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
-  gap: 3rem 4rem;
-  align-items: start;
-  width: min(var(--content), 100%);
+  gap: 1.5rem;
+  width: min(32rem, 100%);
   margin: 0 auto;
-  padding: clamp(2.5rem, 6vw, 5rem) 1.25rem clamp(4rem, 8vw, 6rem);
+  padding: clamp(1.5rem, 4vw, 3rem) 1.25rem clamp(4rem, 8vw, 6rem);
 }
 
-.tester-copy { padding-top: 0.5rem; }
+.tester-copy .section-title { font-size: clamp(1.6rem, 5vw, 2.1rem); }
+.tester-copy .section-copy { margin-top: 0.5rem; }
 
-.tester-perks {
-  list-style: none;
-  margin: 2rem 0 0;
-  padding: 0;
-  display: grid;
-  gap: 1rem;
-}
-
-.tester-perks li { display: flex; gap: 0.8rem; align-items: flex-start; }
-.tester-perks svg { flex: none; margin-top: 0.2rem; color: var(--blue-bright); }
-.tester-perks strong { display: block; font-weight: 600; color: var(--ink); }
-.tester-perks span { font-size: 0.92rem; color: var(--ink-2); line-height: 1.5; }
-
+.tester-aside a { color: var(--ink); }
 .tester-aside {
-  margin: 2rem 0 0;
+  margin: 0;
   padding: 0.9rem 1rem;
   border-left: 2px solid var(--opti);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -1731,8 +1721,7 @@ kbd.ui-label {
 
   .steps,
   .feature-grid,
-  .testers-banner,
-  .tester-shell { grid-template-columns: 1fr; }
+  .testers-banner { grid-template-columns: 1fr; }
   .step + .step::before { display: none; }
   .values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .install-why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1766,6 +1755,12 @@ kbd.ui-label {
   .spotlight-main { padding: 1.2rem; }
   .form-grid { grid-template-columns: 1fr; }
   .tester-rail li { font-size: 0.72rem; gap: 0.35rem; }
+  /* Two buttons plus the brand do not fit at 390px; "Back to home" becomes
+     its arrow so "Open OptiStudy" is not cut off at the edge. */
+  .tester-topbar { padding-inline: 1rem; gap: 0.6rem; }
+  .tester-topbar-actions .secondary-button { padding-inline: 0.7rem; }
+  .tester-topbar-actions .secondary-button svg { margin: 0; }
+  .tester-topbar-actions .secondary-button span { display: none; }
   .spotlight-brand { align-items: flex-start; }
   .product-actions > * { width: 100%; }
 
