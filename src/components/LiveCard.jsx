@@ -14,11 +14,17 @@ import { useIsAndroid } from '../hooks/usePlatform';
  * single thing and offers a single action; everything else stays where it
  * already lives, in the hero and the #install guide.
  *
- * The action follows the device, the same split the hero and launch bar make:
- * an Android phone gets the app file, everyone else gets the install steps for
- * their own OS. It cannot install OptiStudy directly — a browser will only
- * offer that for the site serving the manifest, and that is optistudy.in, not
- * iivo.org.
+ * The action follows the device. An Android phone gets the app file, which is
+ * a plain download and so works from any origin.
+ *
+ * Everywhere else the button opens optistudy.in, because **iivo.org cannot
+ * install OptiStudy itself**: `beforeinstallprompt` only fires on the origin
+ * serving the manifest, and a manifest installs its own site — one here would
+ * install iivo.org. There is no cross-origin install API. optistudy.in carries
+ * the manifest, the service worker and its own Install button, so the handoff
+ * is the shortest real path: one click here, one click there. The steps stay
+ * one tap away for anyone whose browser offers no prompt (Firefox, Safari on
+ * iOS) or who would rather read them.
  */
 
 const DISMISSED_KEY = 'iivo.liveCard.dismissed';
@@ -77,17 +83,17 @@ export default function LiveCard({ ready = true }) {
             Download for Android
           </a>
         ) : (
-          <a
-            href="#install"
-            className="opti-button button--sm"
-            onClick={() => window.dispatchEvent(new CustomEvent(OPEN_INSTALL_EVENT))}
-          >
+          <a href={OPTISTUDY_APP_URL} className="opti-button button--sm" target="_blank" rel="noreferrer">
             <MonitorDown size={15} />
             Install on this device
           </a>
         )}
-        <a href={OPTISTUDY_APP_URL} className="live-card-link" target="_blank" rel="noreferrer">
-          Open in browser
+        <a
+          href="#install"
+          className="live-card-link"
+          onClick={() => window.dispatchEvent(new CustomEvent(OPEN_INSTALL_EVENT))}
+        >
+          {android ? 'Other ways' : 'See the steps'}
           <ArrowUpRight size={13} />
         </a>
       </div>

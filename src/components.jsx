@@ -285,10 +285,14 @@ export function Spotlight() {
             Download OptiStudy for Android
           </a>
         ) : (
-          /* Everyone else: down to the guide, which opens on their device. */
+          /* Everyone else: the steps for their own device. This cannot be a
+             one-click install — beforeinstallprompt only fires on the origin
+             serving the manifest, so iivo.org can never install OptiStudy; the
+             install happens on optistudy.in. Labelled for what it does, because
+             "Install on this device" read as a promise and then scrolled. */
           <a href="#install" className="opti-button opti-button--ghost button--xl spotlight-button" onClick={openInstallGuide}>
             <MonitorDown size={20} />
-            Install on this device
+            How to install it
           </a>
         )}
       </div>
