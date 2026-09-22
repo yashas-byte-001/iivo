@@ -1,11 +1,8 @@
 import React from 'react';
 import {
-  ArrowUpRight,
-  CircleCheck,
   Dock,
   Download,
   EllipsisVertical,
-  Info,
   Laptop,
   Monitor,
   MonitorDown,
@@ -16,7 +13,7 @@ import {
   Terminal,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
 
 const APP_HOST = OPTISTUDY_APP_HOST;
 
@@ -315,21 +312,19 @@ function detectPlatform() {
 
 export default function InstallGuide() {
   const [detected, setDetected] = React.useState(null);
-  const [active, setActive] = React.useState('windows');
+  // Nothing is open until the visitor picks a device: five sets of steps on
+  // one screen was a wall, and on a phone the tab strip scrolled sideways.
+  const [active, setActive] = React.useState(null);
   const tabRefs = React.useRef({});
 
   React.useEffect(() => {
-    const platform = detectPlatform();
-    if (platform) {
-      setDetected(platform);
-      setActive(platform);
-    }
+    setDetected(detectPlatform());
   }, []);
 
-  const current = PLATFORMS.find((platform) => platform.id === active) ?? PLATFORMS[0];
+  const current = active ? PLATFORMS.find((platform) => platform.id === active) : null;
 
   const handleKeyDown = (event) => {
-    const index = PLATFORMS.findIndex((platform) => platform.id === active);
+    const index = Math.max(0, PLATFORMS.findIndex((platform) => platform.id === active));
     let next = index;
 
     if (event.key === 'ArrowRight') next = (index + 1) % PLATFORMS.length;
@@ -353,8 +348,8 @@ export default function InstallGuide() {
             <h2 className="section-title">Install OptiStudy on any device.</h2>
           </div>
           <p className="section-copy">
-            OptiStudy installs straight from your browser, with no app store in between &mdash; and on Android there is an app to
-            download. Either way it works like a native app on your phone, tablet or computer. Pick your device below.
+            No app store in between: on Android there is an app to download, everywhere else it installs straight from your browser.
+            Pick your device to see the steps.
           </p>
         </div>
 
@@ -374,17 +369,19 @@ export default function InstallGuide() {
                   id={`install-tab-${platform.id}`}
                   aria-selected={selected}
                   aria-controls={`install-panel-${platform.id}`}
-                  tabIndex={selected ? 0 : -1}
+                  tabIndex={selected || (!active && platform.id === (detected ?? PLATFORMS[0].id)) ? 0 : -1}
                   className="install-tab"
-                  onClick={() => setActive(platform.id)}
+                  onClick={() => setActive(selected ? null : platform.id)}
                 >
-                  <Icon size={16} />
-                  {platform.label}
+                  <Icon size={18} />
+                  <span>{platform.label}</span>
+                  {platform.id === detected ? <small>Your device</small> : null}
                 </button>
               );
             })}
           </div>
 
+          {current ? (
           <div
             key={current.id}
             className="install-body"
@@ -393,23 +390,8 @@ export default function InstallGuide() {
             aria-labelledby={`install-tab-${current.id}`}
           >
             <div>
-              {detected === current.id ? (
-                <p className="install-detected">
-                  <CircleCheck size={14} />
-                  Looks like you&rsquo;re on {current.label} &mdash; these are the steps for your device.
-                </p>
-              ) : null}
-
               <div className="install-head">
                 <h3>{current.title}</h3>
-                <ul className="install-browsers" aria-label="Supported browsers">
-                  {current.browsers.map((browser) => (
-                    <li key={browser.name} className={browser.recommended ? 'is-recommended' : ''}>
-                      {browser.name}
-                      {browser.recommended ? ' · recommended' : ''}
-                    </li>
-                  ))}
-                </ul>
               </div>
 
               <ol className="install-steps">
@@ -434,44 +416,11 @@ export default function InstallGuide() {
               ) : null}
             </div>
 
-            <aside className="install-aside">
-              <div className="install-card install-card--opti">
-                <h4>
-                  <Info size={16} />
-                  Install from this address
-                </h4>
-                <p>
-                  {current.action
-                    ? 'The download above installs it. This is the address the app opens, and where you sign in.'
-                    : 'Every step above starts by opening OptiStudy. This is the only address you need.'}
-                </p>
-                <span className="install-url">{APP_HOST}</span>
-                <a href={OPTISTUDY_APP_URL} className="opti-button" {...EXTERNAL_LINK_PROPS}>
-                  {current.action ? 'Open OptiStudy in the browser' : 'Open OptiStudy to install'}
-                  <ArrowUpRight size={16} />
-                </a>
-              </div>
-
-              <div className="install-card">
-                <h4>
-                  <Info size={16} />
-                  Good to know
-                </h4>
-                <ul>
-                  <li>Installing is free and takes a few seconds. You can sign in before or after &mdash; it makes no difference.</li>
-                  <li>Your account is the same everywhere. Sign in on a second device and everything is already there.</li>
-                  <li>
-                    To remove it: on a phone, press and hold the icon and choose Remove or Uninstall. On desktop, open the app&rsquo;s own
-                    menu and pick Uninstall OptiStudy.
-                  </li>
-                </ul>
-              </div>
-
-              <p className="install-note">
-                <strong>{current.label}:</strong> {current.note}
-              </p>
-            </aside>
+            <p className="install-note">
+              <strong>{current.label}:</strong> {current.note}
+            </p>
           </div>
+          ) : null}
         </div>
       </div>
     </section>

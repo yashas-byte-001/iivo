@@ -960,38 +960,36 @@ html.is-opening { overflow: hidden; }
   overflow: hidden;
 }
 
+/* One button per device, all visible at once - no sideways scrolling. The
+   steps open underneath the row when one is chosen. */
 .install-tabs {
-  display: flex;
-  gap: 0.25rem;
-  padding: 0.6rem;
-  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.75rem;
   background: var(--bg-2);
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
-.install-tabs::-webkit-scrollbar { display: none; }
-
 .install-tab {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  flex: 1 0 auto;
   justify-content: center;
-  min-height: 2.75rem;
-  padding: 0 1rem;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
+  gap: 0.4rem;
+  min-height: 4.6rem;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
   color: var(--ink-2);
   font-size: 0.9rem;
   font-weight: 500;
-  white-space: nowrap;
+  text-align: center;
   cursor: pointer;
   transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
 }
 
-.install-tab:hover { color: var(--ink); }
+.install-tab:hover { color: var(--ink); border-color: var(--line-strong); }
 
 .install-tab[aria-selected='true'] {
   background: var(--blue-tint);
@@ -1001,11 +999,13 @@ html.is-opening { overflow: hidden; }
 
 .install-tab svg { color: var(--ink-3); }
 .install-tab[aria-selected='true'] svg { color: var(--blue-bright); }
+.install-tab small { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--success); }
 
+.install-body { border-top: 1px solid var(--line); }
 .install-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  gap: 2rem 3rem;
+  gap: 1.5rem;
+  max-width: 44rem;
   padding: clamp(1.5rem, 3vw, 2.5rem);
 }
 
@@ -1677,8 +1677,8 @@ kbd.ui-label {
   .values,
   .install-why { grid-template-columns: 1fr; }
 
-  .install-tabs { padding: 0.5rem; }
-  .install-tab { flex: 0 0 auto; }
+  .install-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0.5rem; }
+  .install-tab:last-child { grid-column: 1 / -1; }
   .install-body { padding: 1.25rem 1rem; }
 
   .form-grid { grid-template-columns: 1fr; }
