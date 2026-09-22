@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   ArrowUpRight,
-  Bell,
   CircleCheck,
   Dock,
   Download,
@@ -10,13 +9,11 @@ import {
   Laptop,
   Monitor,
   MonitorDown,
-  RefreshCw,
   Share,
   Smartphone,
   SquarePlus,
   Tablet,
   Terminal,
-  Zap,
 } from 'lucide-react';
 
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
@@ -316,13 +313,6 @@ function detectPlatform() {
   return null;
 }
 
-const WHY = [
-  { icon: Zap, title: 'One tap to open', body: 'Its own icon on your home screen, dock or taskbar. No address bar, no tabs.' },
-  { icon: RefreshCw, title: 'Always current', body: 'Updates arrive automatically the next time you open it. Nothing to reinstall.' },
-  { icon: Bell, title: 'Feels native', body: 'Runs full-screen in its own window and behaves like an app from the store.' },
-  { icon: CircleCheck, title: 'No app store', body: 'Installs straight from the browser in a few seconds — or as a 1.4 MB download on Android. Takes almost no space.' },
-];
-
 export default function InstallGuide() {
   const [detected, setDetected] = React.useState(null);
   const [active, setActive] = React.useState('windows');
@@ -366,19 +356,6 @@ export default function InstallGuide() {
             OptiStudy installs straight from your browser, with no app store in between &mdash; and on Android there is an app to
             download. Either way it works like a native app on your phone, tablet or computer. Pick your device below.
           </p>
-        </div>
-
-        <div className="install-why">
-          {WHY.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.title}>
-                <Icon size={20} />
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </div>
-            );
-          })}
         </div>
 
         <div className="install-panel">

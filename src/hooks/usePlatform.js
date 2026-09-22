@@ -7,7 +7,15 @@ import React from 'react';
  * device). Read after mount so the first paint is the same for everyone.
  */
 export function isAndroid() {
-  return typeof navigator !== 'undefined' && /Android/.test(navigator.userAgent || '');
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/Android/i.test(ua)) return true;
+  if (navigator.userAgentData && navigator.userAgentData.platform === 'Android') return true;
+  // "Desktop site" on an Android phone reports itself as X11/Linux and drops
+  // the word Android; a touch screen that is not Apple's is the next best sign.
+  const touch = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const apple = /iPhone|iPad|iPod|Macintosh/.test(ua);
+  return touch && !apple && /Linux|X11/.test(ua);
 }
 
 export function useIsAndroid() {
