@@ -27,6 +27,7 @@ import {
 import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
 import { useIsAndroid } from './hooks/usePlatform';
 import playgroundShot from '../assets/playground.png';
+import optistudyIcon from '../assets/optistudy.png';
 
 /*
  * The site map. Nav, mobile sheet and footer all read from this so a section
@@ -99,7 +100,7 @@ export function OptiButton({ children, className = '', ghost = false, ...props }
 export function OptiMark({ size = 'md' }) {
   return (
     <span className={`opti-mark opti-mark--${size}`} aria-hidden="true">
-      O
+      <img src={optistudyIcon} alt="" width="192" height="192" />
     </span>
   );
 }
