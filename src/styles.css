@@ -524,6 +524,8 @@ html.is-opening { overflow: hidden; }
   width: min(var(--content), 100%);
   margin: 0 auto;
   display: grid;
+  /* minmax(0, …): a long button label must shrink to the column, not widen it */
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   text-align: center;
 }
@@ -608,120 +610,43 @@ html.is-opening { overflow: hidden; }
    product's name, its address, one big button, and a plain statement
    that accounts live inside the app.
    ------------------------------------------------------------ */
+/* The product's name and the way in — no card around it. */
 .spotlight {
   position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 1.4rem;
   width: 100%;
   margin-top: 2.5rem;
-  border: 1px solid var(--opti-line);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.05)), var(--surface);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 0 80px rgba(139, 92, 246, 0.18), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
-  text-align: left;
-  overflow: hidden;
-}
-
-.spotlight--banner { margin-top: 0; }
-
-/* In the narrower banner column the spotlight stacks. */
-.spotlight--banner .spotlight-main { flex-direction: column; align-items: stretch; }
-.spotlight--banner .spotlight-actions { justify-items: stretch; }
-.spotlight--banner .spotlight-button { min-width: 0; width: 100%; }
-.spotlight--banner .spotlight-host { justify-content: center; }
-.spotlight--banner .spotlight-facts { grid-template-columns: 1fr; }
-.spotlight--banner .spotlight-facts li + li { border-left: 0; border-top: 1px solid var(--line); }
-
-.spotlight-main {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem 2rem;
-  padding: 1.5rem 1.6rem;
 }
 
 .spotlight-brand {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 0.9rem 1rem;
   min-width: 0;
+  text-align: left;
 }
 
 .spotlight-name {
   margin: 0;
-  font-size: 1.45rem;
+  font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
   color: #fff;
 }
 
-.spotlight-tag { margin: 0.15rem 0 0; font-size: 0.9rem; color: var(--ink-2); }
-
-.spotlight-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.7rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgba(7, 11, 22, 0.5);
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
+.spotlight-tag { margin: 0.15rem 0 0; font-size: 0.92rem; color: var(--ink-2); }
 
 .spotlight-actions {
-  display: grid;
-  gap: 0.5rem;
-  justify-items: center;
-  flex: none;
-}
-
-.spotlight-button { min-width: 16rem; }
-.spotlight-detail { font-size: 0.85rem; color: var(--ink-3); }
-.spotlight-alt { margin-top: 0.35rem; text-decoration: none; }
-
-.spotlight-host {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--ink-2);
-  transition: color var(--dur-fast) ease;
-}
-
-.spotlight-host:hover { color: var(--ink); }
-.spotlight-host svg { color: var(--opti-bright); }
-
-.spotlight-facts {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--opti-line);
-  background: rgba(7, 11, 22, 0.45);
-}
-
-.spotlight-facts li {
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.95rem 1.2rem;
-  font-size: 0.88rem;
-  line-height: 1.45;
-  color: var(--ink-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
 }
 
-.spotlight-facts li + li { border-left: 1px solid var(--line); }
-.spotlight-facts svg { flex: none; margin-top: 0.15rem; color: var(--opti-bright); }
-.spotlight-facts strong { color: var(--ink); font-weight: 600; }
-.spotlight-facts a { color: var(--opti-bright); font-weight: 600; }
-.spotlight-facts a:hover { color: #fff; }
+.spotlight-button { min-width: 16rem; text-decoration: none; }
 
 /* Pinned launch bar for small screens. Hidden on desktop, where the nav
    button is always in view. */
@@ -1729,12 +1654,8 @@ kbd.ui-label {
   .install-why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .footer-links-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-  .spotlight-main { flex-direction: column; align-items: stretch; }
-  .spotlight-actions { justify-items: stretch; }
-  .spotlight-button { min-width: 0; width: 100%; }
-  .spotlight-host { justify-content: center; }
-  .spotlight-facts { grid-template-columns: 1fr; }
-  .spotlight-facts li + li { border-left: 0; border-top: 1px solid var(--line); }
+  .spotlight-actions { flex-direction: column; align-items: stretch; }
+  .spotlight-button { min-width: 0; width: 100%; padding-inline: 1rem; }
 }
 
 @media (max-width: 640px) {
@@ -1760,7 +1681,6 @@ kbd.ui-label {
   .install-tab { flex: 0 0 auto; }
   .install-body { padding: 1.25rem 1rem; }
 
-  .spotlight-main { padding: 1.2rem; }
   .form-grid { grid-template-columns: 1fr; }
   .tester-rail li { font-size: 0.72rem; gap: 0.35rem; }
   /* Two buttons plus the brand do not fit at 390px; "Back to home" becomes
@@ -1769,7 +1689,6 @@ kbd.ui-label {
   .tester-topbar-actions .secondary-button { padding-inline: 0.7rem; }
   .tester-topbar-actions .secondary-button svg { margin: 0; }
   .tester-topbar-actions .secondary-button span { display: none; }
-  .spotlight-brand { align-items: flex-start; }
   .product-actions > * { width: 100%; }
 
   .footer-links-grid { grid-template-columns: 1fr; gap: 1.25rem; }

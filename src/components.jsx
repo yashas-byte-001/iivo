@@ -249,91 +249,37 @@ export function LaunchBar({ activeSection = 'home' }) {
 /* ------------------------------------------------------------------ */
 
 /*
- * The product spotlight. It carries the OptiStudy purple, the address, one
- * big button, and a plain statement that accounts live inside the app,
- * because visitors kept looking for a login form on this site.
+ * The product, named, and the way in. No card, no facts, no third option:
+ * the name, "Open OptiStudy", and on an Android phone the app download beside
+ * it. Everything else the visitor might want (install on other devices,
+ * accounts live in the app) is further down the page, not in front of the
+ * button. The earlier card carried all of that at once, and it read as a
+ * page of instructions.
  */
-export function Spotlight({ variant = 'hero' }) {
+export function Spotlight() {
   const android = useIsAndroid();
   return (
-    <div className={`spotlight spotlight--${variant}`}>
-      <div className="spotlight-main">
-        <div className="spotlight-brand">
-          <OptiMark size="lg" />
-          <div>
-            <h2 className="spotlight-name">OptiStudy</h2>
-            <p className="spotlight-tag">The AI-powered academic workspace</p>
-          </div>
-          <span className="spotlight-status">
-            <span className="live-dot" aria-hidden="true" />
-            Live &middot; open to everyone
-          </span>
-        </div>
-
-        {/* One primary action per visitor. An Android phone gets the app
-            file, because "download the app" is what that visitor is looking
-            for; everyone else opens the site, with the install guide for
-            their device one tap away. Both routes lead to the same account. */}
-        <div className="spotlight-actions">
-          {android ? (
-            <>
-              <a href={OPTISTUDY_APK_URL} className="opti-button button--xl spotlight-button" download>
-                <Download size={20} />
-                Download for Android
-              </a>
-              <span className="spotlight-detail">Free &middot; 1.4 MB &middot; installs in a minute</span>
-              <OptiButton ghost className="button--sm spotlight-alt">
-                Or open in your browser
-                <ArrowUpRight size={15} />
-              </OptiButton>
-            </>
-          ) : (
-            <>
-              <OptiButton className="button--xl spotlight-button">
-                Open OptiStudy
-                <ArrowUpRight size={20} />
-              </OptiButton>
-              <a href={OPTISTUDY_APP_URL} className="spotlight-host" {...EXTERNAL_LINK_PROPS}>
-                <Globe size={14} />
-                {OPTISTUDY_APP_HOST}
-              </a>
-              <a href="#install" className="opti-button opti-button--ghost button--sm spotlight-alt">
-                <MonitorDown size={15} />
-                Install it on this device
-              </a>
-            </>
-          )}
+    <div className="spotlight">
+      <div className="spotlight-brand">
+        <OptiMark size="lg" />
+        <div>
+          <h2 className="spotlight-name">OptiStudy</h2>
+          <p className="spotlight-tag">The AI-powered academic workspace</p>
         </div>
       </div>
 
-      <ul className="spotlight-facts">
-        <li>
-          <UserRoundPlus size={16} />
-          <span>
-            <strong>New here?</strong> Create your account in the app
-          </span>
-        </li>
-        <li>
-          <KeyRound size={16} />
-          <span>
-            <strong>Already have one?</strong> Sign in there too
-          </span>
-        </li>
-        <li>
-          {android ? <Globe size={16} /> : <MonitorDown size={16} />}
-          <span>
-            {android ? (
-              <>
-                <strong>No download needed.</strong> The app and <a href={OPTISTUDY_APP_URL} {...EXTERNAL_LINK_PROPS}>{OPTISTUDY_APP_HOST}</a> are the same thing
-              </>
-            ) : (
-              <>
-                <strong>Any device.</strong> <a href="#install">Install it</a> for one-tap access
-              </>
-            )}
-          </span>
-        </li>
-      </ul>
+      <div className="spotlight-actions">
+        <OptiButton className="button--xl spotlight-button">
+          Open OptiStudy
+          <ArrowUpRight size={20} />
+        </OptiButton>
+        {android ? (
+          <a href={OPTISTUDY_APK_URL} className="opti-button opti-button--ghost button--xl spotlight-button" download>
+            <Download size={20} />
+            Download OptiStudy for Android
+          </a>
+        ) : null}
+      </div>
     </div>
   );
 }
