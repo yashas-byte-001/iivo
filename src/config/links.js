@@ -10,6 +10,12 @@
 export const OPTISTUDY_APP_URL = 'https://optistudy.in';
 export const OPTISTUDY_APP_HOST = 'optistudy.in';
 
+/* The Android app. One file, hosted with the product so its version and
+   SHA-256 on the download page always describe the file being served; iivo.org
+   links to it rather than keeping a copy that would drift on every rebuild. */
+export const OPTISTUDY_APK_URL = 'https://optistudy.in/OptiStudy.apk';
+export const OPTISTUDY_DOWNLOAD_URL = 'https://optistudy.in/download';
+
 /* The tester programme page: the one sign-in on iivo.org, and it is for the
    programme, not for OptiStudy. */
 export const TESTER_URL = 'tester.html';

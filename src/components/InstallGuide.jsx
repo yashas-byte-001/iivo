@@ -4,6 +4,7 @@ import {
   Bell,
   CircleCheck,
   Dock,
+  Download,
   EllipsisVertical,
   Info,
   Laptop,
@@ -18,7 +19,7 @@ import {
   Zap,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL } from '../config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
 
 const APP_HOST = OPTISTUDY_APP_HOST;
 
@@ -94,49 +95,57 @@ const PLATFORMS = [
     id: 'android',
     label: 'Android',
     icon: Tablet,
-    title: 'Install OptiStudy from Chrome',
+    title: 'Download the OptiStudy app',
     browsers: [
       { name: 'Chrome', recommended: true },
       { name: 'Samsung Internet' },
       { name: 'Edge' },
       { name: 'Firefox' },
     ],
+    /* A real app file (a signed shell that opens OptiStudy in Chrome), so the
+       steps are download-and-install rather than a browser menu. Every
+       improvement to OptiStudy reaches the installed app on its own. */
+    action: { href: OPTISTUDY_APK_URL, label: 'Download for Android', detail: 'About 1.4 MB · Android 5.0 and up' },
     steps: [
       {
-        title: 'Open OptiStudy in Chrome',
+        title: 'Download the app',
         body: (
           <>
-            Go to <Label>{APP_HOST}</Label>. If Chrome shows an <Label>Install</Label> banner at the bottom of the screen, you can tap that
-            and skip straight to the last step.
+            Tap <Label>Download for Android</Label> below. Chrome may say the file could be harmful &mdash; that is Android&rsquo;s
+            message for any app that does not come from the Play Store.
           </>
         ),
       },
       {
-        title: 'Open the browser menu',
+        title: 'Open the downloaded file',
         body: (
           <>
-            Tap the three dots <Glyph icon={EllipsisVertical} label="Menu icon" /> in the top-right corner.
+            Tap <Label>Open</Label> in Chrome&rsquo;s download bar, or open <Label>OptiStudy.apk</Label> from your notifications. The first
+            time, Android asks you to allow installs from Chrome &mdash; allow it once and go back.
           </>
         ),
       },
       {
-        title: 'Choose “Add to Home screen” or “Install app”',
+        title: 'Tap “Install”',
         body: (
           <>
-            Newer versions of Chrome show <Label>Install app</Label>; older ones show <Label>Add to Home screen</Label>. Either is fine.
-          </>
-        ),
-      },
-      {
-        title: 'Confirm with “Install”',
-        body: (
-          <>
-            OptiStudy is added to your home screen and app drawer, and opens in its own window without the browser bar.
+            OptiStudy appears in your app drawer. Open it and sign in with your account. You never need to reinstall: the app always shows
+            the current OptiStudy.
           </>
         ),
       },
     ],
-    note: 'Samsung Internet: tap the menu, then “Add page to” → “Home screen”, or use the install icon in the address bar. Edge: menu → “Add to phone”. Firefox: menu → “Install”.',
+    note: (
+      <>
+        Prefer not to download a file? Open <Label>{APP_HOST}</Label> in Chrome, tap the three dots{' '}
+        <Glyph icon={EllipsisVertical} label="Menu icon" /> and choose <Label>Install app</Label> &mdash; you get the same app without the
+        download. Full details and the file&rsquo;s checksum are at{' '}
+        <a href={OPTISTUDY_DOWNLOAD_URL} {...EXTERNAL_LINK_PROPS}>
+          optistudy.in/download
+        </a>
+        .
+      </>
+    ),
   },
   {
     id: 'windows',
@@ -311,7 +320,7 @@ const WHY = [
   { icon: Zap, title: 'One tap to open', body: 'Its own icon on your home screen, dock or taskbar. No address bar, no tabs.' },
   { icon: RefreshCw, title: 'Always current', body: 'Updates arrive automatically the next time you open it. Nothing to reinstall.' },
   { icon: Bell, title: 'Feels native', body: 'Runs full-screen in its own window and behaves like an app from the store.' },
-  { icon: CircleCheck, title: 'No store, no download', body: 'Installs straight from the browser in a few seconds and takes almost no space.' },
+  { icon: CircleCheck, title: 'No app store', body: 'Installs straight from the browser in a few seconds — or as a 1.4 MB download on Android. Takes almost no space.' },
 ];
 
 export default function InstallGuide() {
@@ -354,8 +363,8 @@ export default function InstallGuide() {
             <h2 className="section-title">Install OptiStudy on any device.</h2>
           </div>
           <p className="section-copy">
-            OptiStudy is a progressive web app: it installs straight from your browser, with no app store in between, and then works like
-            a native app on your phone, tablet or computer. Pick your device below.
+            OptiStudy installs straight from your browser, with no app store in between &mdash; and on Android there is an app to
+            download. Either way it works like a native app on your phone, tablet or computer. Pick your device below.
           </p>
         </div>
 
@@ -436,6 +445,16 @@ export default function InstallGuide() {
                   </li>
                 ))}
               </ol>
+
+              {current.action ? (
+                <div className="install-action">
+                  <a href={current.action.href} className="opti-button" download>
+                    <Download size={16} />
+                    {current.action.label}
+                  </a>
+                  <span>{current.action.detail}</span>
+                </div>
+              ) : null}
             </div>
 
             <aside className="install-aside">
@@ -444,7 +463,11 @@ export default function InstallGuide() {
                   <Info size={16} />
                   Install from this address
                 </h4>
-                <p>Every step above starts by opening OptiStudy. This is the only address you need.</p>
+                <p>
+                  {current.action
+                    ? 'The download above installs it. This is the address the app opens, and where you sign in.'
+                    : 'Every step above starts by opening OptiStudy. This is the only address you need.'}
+                </p>
                 <span className="install-url">{APP_HOST}</span>
                 <a href={OPTISTUDY_APP_URL} className="opti-button" {...EXTERNAL_LINK_PROPS}>
                   Open OptiStudy to install

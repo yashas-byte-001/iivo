@@ -23,7 +23,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
 import playgroundShot from '../assets/playground.png';
 
 /*
@@ -519,6 +519,9 @@ export function Footer() {
               </a>
               <a href="#optistudy">Overview</a>
               <a href="#install">Install the app</a>
+              <a href={OPTISTUDY_APK_URL} download>
+                Download for Android
+              </a>
             </div>
             <div>
               <h3>Company</h3>
