@@ -159,13 +159,11 @@ export function Navbar({ activeSection = 'home' }) {
             ))}
           </nav>
 
-          {/* The launch button never hides behind the menu: on a phone it sits
-              beside the toggle so the product is one tap away from anywhere. */}
+          {/* No launch button up here. The product is reached from the hero,
+              the pinned launch bar once the hero scrolls away, the menu sheet
+              on a phone, and the live card on arrival — four ways already, and
+              a fifth in the chrome made the bar busy. */}
           <div className="nav-actions">
-            <OptiButton className="button--sm nav-launch">
-              Open OptiStudy
-              <ArrowUpRight size={15} />
-            </OptiButton>
             <button
               type="button"
               className="nav-toggle"

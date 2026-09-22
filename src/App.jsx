@@ -3,6 +3,7 @@ import { About, Footer, Hero, LaunchBar, Navbar, Product, SECTIONS, Testers } fr
 import Loader, { shouldShowLoader } from './components/Loader';
 
 const InstallGuide = React.lazy(() => import('./components/InstallGuide'));
+const LiveCard = React.lazy(() => import('./components/LiveCard'));
 const TesterPage = React.lazy(() => import('./components/TesterPage'));
 
 /*
@@ -86,6 +87,10 @@ export default function App() {
         </main>
         <Footer />
         <LaunchBar activeSection={activeSection} />
+        {/* Waits for the opening to finish before it slides in. */}
+        <React.Suspense fallback={null}>
+          <LiveCard ready={!opening} />
+        </React.Suspense>
         </div>
     </>
   );

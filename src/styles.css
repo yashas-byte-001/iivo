@@ -682,6 +682,91 @@ html.is-opening { overflow: hidden; }
 .launch-bar-text span:not(.opti-mark) { font-size: 0.72rem; color: var(--ink-3); font-family: var(--font-mono); }
 
 /* ============================================================
+   Live card — the arrival announcement, dismissible
+   ============================================================ */
+.live-card {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 59;
+  width: min(330px, calc(100vw - 2.2rem));
+  padding: 1rem 1.05rem 1.05rem;
+  border: 1px solid var(--opti-line);
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--surface-2), var(--surface));
+  box-shadow: 0 18px 48px rgba(3, 6, 15, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.06);
+  animation: live-card-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.live-card.is-leaving { animation: live-card-out 0.2s ease forwards; }
+
+@keyframes live-card-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes live-card-out {
+  to { opacity: 0; transform: translateY(8px) scale(0.99); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-card, .live-card.is-leaving { animation: none; }
+}
+
+.live-card-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ink-3);
+  background: transparent;
+  cursor: pointer;
+}
+.live-card-close:hover { color: var(--ink); background: var(--surface-hover); }
+
+.live-card-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--opti-bright);
+}
+.live-card-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--opti);
+  box-shadow: 0 0 0 3px var(--opti-tint);
+}
+.live-card-copy {
+  margin: 0 0 0.85rem;
+  padding-right: 1.2rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.live-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.live-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+.live-card-link:hover { color: var(--ink); }
+
+/* ============================================================
    Get started
    ============================================================ */
 .steps {
@@ -1640,6 +1725,21 @@ kbd.ui-label {
 
   /* Room for the pinned launch bar. */
   body { padding-bottom: 4.5rem; }
+
+  /* The launch bar owns the bottom of a small screen; the card sits above it
+     whether or not it is currently showing, so they can never overlap. On a
+     phone it also lies over the hero, so it is kept to two short lines and a
+     single button — the hero's own actions are directly underneath it. */
+  .live-card {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 5.1rem;
+    width: auto;
+    padding: 0.8rem 0.85rem 0.85rem;
+  }
+  .live-card-kicker { font-size: 0.7rem; margin-bottom: 0.25rem; }
+  .live-card-copy { margin-bottom: 0.65rem; font-size: 0.84rem; }
+  .live-card-close { top: 0.4rem; right: 0.4rem; }
 
   .product-grid,
   .cta-banner,
