@@ -9,7 +9,6 @@ import {
   ClipboardList,
   Eye,
   FlaskConical,
-  Download,
   Globe,
   GraduationCap,
   KeyRound,
@@ -24,8 +23,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
-import { useIsAndroid } from './hooks/usePlatform';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, TESTER_URL } from './config/links';
 import playgroundShot from '../assets/playground.png';
 import optistudyIcon from '../assets/optistudy.png';
 
@@ -113,7 +111,6 @@ export function Navbar({ activeSection = 'home' }) {
   const isCompact = useMediaQuery('(max-width: 1024px)');
   const [scrolled, setScrolled] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const android = useIsAndroid();
 
   React.useEffect(() => {
     const update = () => setScrolled(window.scrollY > 8);
@@ -188,13 +185,7 @@ export function Navbar({ activeSection = 'home' }) {
           ))}
         </nav>
         <div className="nav-sheet-actions">
-          {android ? (
-            <a href={OPTISTUDY_APK_URL} className="opti-button button--lg" download>
-              <Download size={16} />
-              Download for Android
-            </a>
-          ) : null}
-          <OptiButton className="button--lg" ghost={android}>
+          <OptiButton className="button--lg">
             Open OptiStudy
             <ArrowUpRight size={16} />
           </OptiButton>
@@ -218,7 +209,6 @@ export function Navbar({ activeSection = 'home' }) {
  */
 export function LaunchBar({ activeSection = 'home' }) {
   const visible = activeSection !== 'home';
-  const android = useIsAndroid();
   return (
     <div className={`launch-bar ${visible ? 'is-visible' : ''}`} aria-hidden={!visible}>
       <div className="launch-bar-text">
@@ -228,17 +218,10 @@ export function LaunchBar({ activeSection = 'home' }) {
           <span>{OPTISTUDY_APP_HOST}</span>
         </div>
       </div>
-      {android ? (
-        <a href={OPTISTUDY_APK_URL} className="opti-button button--sm" download tabIndex={visible ? 0 : -1}>
-          <Download size={15} />
-          Download
-        </a>
-      ) : (
-        <OptiButton className="button--sm" tabIndex={visible ? 0 : -1}>
-          Open
-          <ArrowUpRight size={15} />
-        </OptiButton>
-      )}
+      <OptiButton className="button--sm" tabIndex={visible ? 0 : -1}>
+        Open
+        <ArrowUpRight size={15} />
+      </OptiButton>
     </div>
   );
 }
@@ -249,8 +232,7 @@ export function LaunchBar({ activeSection = 'home' }) {
 
 /*
  * The product, named, and the way in. No card, no facts, no third option:
- * the name, "Open OptiStudy", and on an Android phone the app download beside
- * it. Everything else the visitor might want (install on other devices,
+ * the name, "Open OptiStudy", and how to install it. Everything else the visitor might want (install on other devices,
  * accounts live in the app) is further down the page, not in front of the
  * button. The earlier card carried all of that at once, and it read as a
  * page of instructions.
@@ -263,7 +245,6 @@ function openInstallGuide() {
 }
 
 export function Spotlight() {
-  const android = useIsAndroid();
   return (
     <div className="spotlight">
       <div className="spotlight-brand">
@@ -279,22 +260,16 @@ export function Spotlight() {
           Open OptiStudy
           <ArrowUpRight size={20} />
         </OptiButton>
-        {android ? (
-          <a href={OPTISTUDY_APK_URL} className="opti-button opti-button--ghost button--xl spotlight-button" download>
-            <Download size={20} />
-            Download OptiStudy for Android
-          </a>
-        ) : (
-          /* Everyone else: the steps for their own device. This cannot be a
-             one-click install — beforeinstallprompt only fires on the origin
-             serving the manifest, so iivo.org can never install OptiStudy; the
-             install happens on optistudy.in. Labelled for what it does, because
-             "Install on this device" read as a promise and then scrolled. */
-          <a href="#install" className="opti-button opti-button--ghost button--xl spotlight-button" onClick={openInstallGuide}>
-            <MonitorDown size={20} />
-            How to install it
-          </a>
-        )}
+        {/* The steps for the visitor's own device — Android included: the APK
+            is retired and OptiStudy installs from the browser everywhere. This
+            cannot be a one-click install — beforeinstallprompt only fires on the
+            origin serving the manifest, so iivo.org can never install OptiStudy;
+            the install happens on optistudy.in. Labelled for what it does,
+            because "Install on this device" read as a promise and then scrolled. */}
+        <a href="#install" className="opti-button opti-button--ghost button--xl spotlight-button" onClick={openInstallGuide}>
+          <MonitorDown size={20} />
+          How to install it
+        </a>
       </div>
     </div>
   );
@@ -531,9 +506,6 @@ export function Footer() {
               </a>
               <a href="#optistudy">Overview</a>
               <a href="#install">Install the app</a>
-              <a href={OPTISTUDY_APK_URL} download>
-                Download for Android
-              </a>
             </div>
             <div>
               <h3>Company</h3>

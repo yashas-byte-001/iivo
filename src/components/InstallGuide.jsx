@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Dock,
-  Download,
   EllipsisVertical,
   Laptop,
   Monitor,
@@ -13,7 +12,7 @@ import {
   Terminal,
 } from 'lucide-react';
 
-import { EXTERNAL_LINK_PROPS, OPTISTUDY_APK_URL, OPTISTUDY_APP_HOST, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
+import { EXTERNAL_LINK_PROPS, OPTISTUDY_APP_HOST, OPTISTUDY_APP_URL, OPTISTUDY_DOWNLOAD_URL } from '../config/links';
 import { OPEN_INSTALL_EVENT } from '../components';
 
 const APP_HOST = OPTISTUDY_APP_HOST;
@@ -90,51 +89,48 @@ const PLATFORMS = [
     id: 'android',
     label: 'Android',
     icon: Tablet,
-    title: 'Download the OptiStudy app',
+    title: 'Install OptiStudy from Chrome',
     browsers: [
       { name: 'Chrome', recommended: true },
       { name: 'Samsung Internet' },
       { name: 'Edge' },
-      { name: 'Firefox' },
     ],
-    /* A real app file (a signed shell that opens OptiStudy in Chrome), so the
-       steps are download-and-install rather than a browser menu. Every
-       improvement to OptiStudy reaches the installed app on its own. */
-    action: { href: OPTISTUDY_APK_URL, label: 'Download for Android', detail: 'About 1.4 MB · Android 5.0 and up' },
+    /* Installs from the browser like every other platform (the APK is
+       retired). The button opens optistudy.in, the only origin that can
+       offer the install. */
+    action: { href: OPTISTUDY_APP_URL, label: 'Open optistudy.in', detail: 'Nothing to download · updates itself' },
     steps: [
       {
-        title: 'Download the app',
+        title: 'Open OptiStudy in Chrome',
         body: (
           <>
-            Tap <Label>Download for Android</Label> below. Chrome may say the file could be harmful &mdash; that is Android&rsquo;s
-            message for any app that does not come from the Play Store.
+            Go to <Label>{APP_HOST}</Label>. You can install before or after signing in.
           </>
         ),
       },
       {
-        title: 'Open the downloaded file',
+        title: 'Tap “Install OptiStudy”',
         body: (
           <>
-            Tap <Label>Open</Label> in Chrome&rsquo;s download bar, or open <Label>OptiStudy.apk</Label> from your notifications. The first
-            time, Android asks you to allow installs from Chrome &mdash; allow it once and go back.
+            It&rsquo;s on the home page. If you don&rsquo;t see it, tap the three dots <Glyph icon={EllipsisVertical} label="Menu icon" /> and
+            choose <Label>Add to Home screen</Label>, then <Label>Install</Label>.
           </>
         ),
       },
       {
-        title: 'Tap “Install”',
+        title: 'Open it from your home screen',
         body: (
           <>
-            OptiStudy appears in your app drawer. Open it and sign in with your account. You never need to reinstall: the app always shows
-            the current OptiStudy.
+            OptiStudy appears with your other apps and opens full-screen. Sign in with your account. It updates itself &mdash; there is
+            nothing to reinstall.
           </>
         ),
       },
     ],
     note: (
       <>
-        Prefer not to download a file? Open <Label>{APP_HOST}</Label> in Chrome, tap the three dots{' '}
-        <Glyph icon={EllipsisVertical} label="Menu icon" /> and choose <Label>Install app</Label> &mdash; you get the same app without the
-        download. Full details and the file&rsquo;s checksum are at{' '}
+        Samsung Internet: open the menu and choose <Label>Add page to</Label>, then <Label>Home screen</Label>. Had the old OptiStudy
+        Android app? Delete it first, then install from Chrome as above &mdash; details at{' '}
         <a href={OPTISTUDY_DOWNLOAD_URL} {...EXTERNAL_LINK_PROPS}>
           optistudy.in/download
         </a>
@@ -356,7 +352,7 @@ export default function InstallGuide() {
             <h2 className="section-title">Install OptiStudy on any device.</h2>
           </div>
           <p className="section-copy">
-            No app store in between: on Android there is an app to download, everywhere else it installs straight from your browser.
+            No app store and nothing to download: OptiStudy installs straight from your browser on every device.
             Pick your device to see the steps.
           </p>
         </div>
@@ -415,8 +411,8 @@ export default function InstallGuide() {
 
               {current.action ? (
                 <div className="install-action">
-                  <a href={current.action.href} className="opti-button" download>
-                    <Download size={16} />
+                  <a href={current.action.href} className="opti-button" {...EXTERNAL_LINK_PROPS}>
+                    <Smartphone size={16} />
                     {current.action.label}
                   </a>
                   <span>{current.action.detail}</span>

@@ -1,9 +1,8 @@
 import React from 'react';
-import { ArrowUpRight, Download, MonitorDown, X } from 'lucide-react';
+import { ArrowUpRight, MonitorDown, X } from 'lucide-react';
 
-import { OPTISTUDY_APK_URL, OPTISTUDY_APP_URL } from '../config/links';
+import { OPTISTUDY_APP_URL } from '../config/links';
 import { OPEN_INSTALL_EVENT } from '../components';
-import { useIsAndroid } from '../hooks/usePlatform';
 
 /*
  * A one-line announcement that OptiStudy is out, shown once per visitor.
@@ -41,7 +40,6 @@ function wasDismissed() {
 }
 
 export default function LiveCard({ ready = true }) {
-  const android = useIsAndroid();
   const [shown, setShown] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
 
@@ -77,23 +75,16 @@ export default function LiveCard({ ready = true }) {
       </p>
 
       <div className="live-card-actions">
-        {android ? (
-          <a href={OPTISTUDY_APK_URL} className="opti-button button--sm" download>
-            <Download size={15} />
-            Download for Android
-          </a>
-        ) : (
-          <a href={OPTISTUDY_APP_URL} className="opti-button button--sm" target="_blank" rel="noreferrer">
-            <MonitorDown size={15} />
-            Install on this device
-          </a>
-        )}
+        <a href={OPTISTUDY_APP_URL} className="opti-button button--sm" target="_blank" rel="noreferrer">
+          <MonitorDown size={15} />
+          Install on this device
+        </a>
         <a
           href="#install"
           className="live-card-link"
           onClick={() => window.dispatchEvent(new CustomEvent(OPEN_INSTALL_EVENT))}
         >
-          {android ? 'Other ways' : 'See the steps'}
+          See the steps
           <ArrowUpRight size={13} />
         </a>
       </div>
